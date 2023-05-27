@@ -1,0 +1,109 @@
+name: Deploy to Amazon EC2
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    env :
+      working-directory: ./
+      APPLICATION: ${{ secrets.APPLICATION }}
+
+    steps:
+      # (1) 기본 체크아웃
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # (2) JDK 11 세팅
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+
+      - uses: actions/checkout@v3
+      - run: touch ./src/main/resources/application.yml
+      - run: echo "${{env.APPLICATION}}" > ./src/main/resources/application.yml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: application.yml
+          path: ./src/main/resources/application.yml
+
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash
+
+      - name: Make zip file
+        run: zip -r ./$GITHUB_SHA.zip .
+        shell: bash
+
+      # (3) Gradle build (Test 제외)
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+        with:
+          arguments: clean build -x test
+
+      - name: Cleanup Gradle Cache
+        if: ${{ always() }}
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
+
+      - name: Docker build
+        run: |
+          sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          sudo docker build -t ${{ secrets.PROJECT_NAME }} .
+          sudo docker tag ${{ secrets.PROJECT_NAME }} ${{ secrets.DOCKER_HUB_REPO }}:${GITHUB_SHA::7}
+          sudo docker push ${{ secrets.DOCKER_HUB_REPO }}:${GITHUB_SHA::7}
+
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ec2-user
+          key: ${{ secrets.KEY }}
+          envs: GITHUB_SHA
+          script: |
+            sudo docker stop $(sudo docker ps -a -q)
+            sudo docker rm $(sudo docker ps -a -q)
+            sudo docker rmi $(sudo docker images -q)
+            sudo docker pull ${{ secrets.DOCKER_HUB_REPO }}:${GITHUB_SHA::7}
+            sudo docker tag ${{ secrets.DOCKER_HUB_REPO }}:${GITHUB_SHA::7} ${{ secrets.PROJECT_NAME }}
+            sudo docker stop ${{ secrets.PROJECT_NAME }}
+            sudo docker rm ${{ secrets.PROJECT_NAME }}
+            sudo docker run -d -p 80:8080 --name ${{ secrets.PROJECT_NAME }} ${{ secrets.PROJECT_NAME }}
+
+#    - name: Make zip file
+#      run: zip -r ./$GITHUB_SHA.zip .
+#      shell: bash
+
+#    # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용 )
+#    - name: Configure AWS credentials
+#      uses: aws-actions/configure-aws-credentials@v1
+#      with:
+#        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        aws-region: ${{ secrets.AWS_REGION }}
+#
+#    # (5) 빌드 결과물을 S3 버킷에 업로드
+#    - name: Upload to AWS S3
+#      run: |
+#        aws s3 cp --region ${{ secrets.AWS_REGION }} ./$GITHUB_SHA.zip s3://${{ secrets.S3_BUCKET_NAME }}/$GITHUB_SHA.zip
+#
+#    # (6) S3 버킷에 있는 파일을 대상으로 CodeDeploy 실행
+#    - name: Deploy to AWS EC2 from S3
+#      run: |
+#        aws deploy create-deployment \
+#          --application-name ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }} \
+#          --deployment-config-name CodeDeployDefault.AllAtOnce \
+#          --deployment-group-name ${{ secrets.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+#          --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=$GITHUB_SHA.zip,bundleType=zip
