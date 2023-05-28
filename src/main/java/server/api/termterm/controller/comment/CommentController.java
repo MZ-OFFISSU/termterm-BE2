@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.Term;
+import server.api.termterm.response.BizException;
 import server.api.termterm.response.ResponseMessage;
 import server.api.termterm.response.comment.CommentRegisterRequestDto;
 import server.api.termterm.response.comment.CommentResponseType;
+import server.api.termterm.response.member.MemberResponseType;
 import server.api.termterm.service.comment.CommentService;
 import server.api.termterm.service.member.MemberService;
 import server.api.termterm.service.term.TermService;
@@ -79,5 +81,23 @@ public class CommentController {
         commentService.dislike(member, id);
 
         return new ResponseEntity<>(ResponseMessage.create(CommentResponseType.DISLIKE_SUCCESS), CommentResponseType.DISLIKE_SUCCESS.getHttpStatus());
+    }
+
+    @ApiOperation(value = "나만의 용어 설명 승인", notes = "나만의 용어 설명 승인")
+    @ApiResponses({
+            @ApiResponse(code = 2064, message = "나만의 용어 설명 승인 완료 (200)"),
+    })
+    @PutMapping("/comment/accept")
+    public ResponseEntity<ResponseMessage<String>> acceptComment(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "id", description = "comment id", in = PATH)  @RequestParam(name = "id") Long id
+    ){
+        Member member = memberService.getMemberByToken(token);
+        if (!memberService.checkAdmin(member))
+            throw new BizException(MemberResponseType.NO_AUTHORIZATION);
+
+        commentService.acceptComment(id);
+
+        return new ResponseEntity<>(ResponseMessage.create(CommentResponseType.ACCEPT_SUCCESS), CommentResponseType.ACCEPT_SUCCESS.getHttpStatus());
     }
 }

@@ -94,4 +94,10 @@ public class CommentService {
         commentLike.dislike();
         comment.subLike();
     }
+
+    @Transactional
+    public void acceptComment(Long id) {
+        Comment comment = findById(id);
+        comment.accept();
+    }
 }
