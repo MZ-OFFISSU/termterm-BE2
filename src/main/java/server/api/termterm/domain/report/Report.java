@@ -25,7 +25,7 @@ public class Report extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
-    private String description;
+    private String content;
 
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
@@ -38,7 +38,7 @@ public class Report extends BaseTimeEntity {
     @JoinColumn(name = "COMMENT_ID")
     private Comment comment;
 
-    public void setStatus(ReportStatus status){
-        this.status = status;
+    public void completeReport(){
+        this.status = ReportStatus.COMPLETED;
     }
 }

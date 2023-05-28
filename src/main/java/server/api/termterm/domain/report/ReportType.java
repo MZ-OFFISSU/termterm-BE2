@@ -15,7 +15,7 @@ public enum ReportType {
     DISGUST("DISGUST", "혐오 발언 또는 상징"),
     ABUSE("ABUSE", "욕설, 비방, 선정성 등 미풍양속을 해치는 내용"),
     SPAM("SPAM", "스팸"),
-    OTHER("OTEHR", "기타"),
+    OTHER("OTHER", "기타"),
     ;
 
     private final String name;

@@ -1,16 +1,16 @@
-package server.api.termterm.dto.member;
+package server.api.termterm.dto.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberCategoriesUpdateRequestDto {
-    List<String> categories;
+public class CommentRegisterRequestDto {
+    private Long termId;
+    private String content;
+    private String source;
 }

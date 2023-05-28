@@ -1,6 +1,7 @@
 package server.api.termterm.domain.comment;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Comment extends BaseTimeEntity {
     @Id
@@ -24,7 +27,8 @@ public class Comment extends BaseTimeEntity {
 
     private String content;
     private String source;
-    private Integer likeCnt = 0;
+
+    private Integer likeCnt;
 
     @Enumerated(EnumType.STRING)
     private CommentStatus status;
@@ -43,13 +47,9 @@ public class Comment extends BaseTimeEntity {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
 
-    @Builder
-    public Comment(String content, String source, CommentStatus status, Term term, Member member) {
-        this.content = content;
-        this.source = source;
-        this.status = status;
-        this.term = term;
-        this.member = member;
+    @PrePersist
+    public void setLikeCnt(){
+        this.likeCnt = 0;
     }
 
     public void addLike(){
@@ -63,6 +63,4 @@ public class Comment extends BaseTimeEntity {
     public void accept(){
         this.status = CommentStatus.ACCEPTED;
     }
-
-
 }
