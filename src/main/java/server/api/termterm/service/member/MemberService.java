@@ -10,16 +10,19 @@ import server.api.termterm.domain.member.Authority;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.jwt.TokenDto;
 import server.api.termterm.dto.member.BaseMemberInfoDto;
+import server.api.termterm.dto.member.MemberCategoriesUpdateRequestDto;
 import server.api.termterm.dto.member.MemberInfoDto;
+import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 import server.api.termterm.jwt.JwtProvider;
+import server.api.termterm.repository.CategoryRepository;
 import server.api.termterm.repository.MemberRepository;
 import server.api.termterm.repository.TokenRepository;
 import server.api.termterm.response.BizException;
+import server.api.termterm.response.category.CategoryResponseType;
 import server.api.termterm.response.jwt.JwtResponseType;
 import server.api.termterm.response.member.MemberResponseType;
 
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +31,12 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final TokenRepository tokenRepository;
+    private final CategoryRepository categoryRepository;
     private final JwtProvider jwtProvider;
+
+    private final String S3_BUCKET_BASE_URL = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com";
+    private final String IMAGE_NAME = "profile-image.jpg";
+    private final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
 
     @Transactional
     public TokenDto issueToken(Member member) {
@@ -166,5 +174,60 @@ public class MemberService {
     @Transactional
     public Boolean checkDuplicateNickname(String nickname){
         return memberRepository.existsByNicknameIgnoreCase(nickname);
+    }
+
+    @Transactional
+    public void updateMemberInfo(Member member, MemberInfoUpdateRequestDto memberInfoUpdateRequestDto) {
+        try {
+            member.updateInfo(memberInfoUpdateRequestDto);
+        }catch (Exception e){
+            throw new BizException(MemberResponseType.FAILED_INFO_UPDATE);
+        }
+    }
+
+    @Transactional
+    public void updateMemberCategories(Member member, MemberCategoriesUpdateRequestDto memberCategoriesUpdateRequestDto) {
+        List<String> categoryStrings = memberCategoriesUpdateRequestDto.getCategories();
+
+        if(!checkValidateCategoryString(categoryStrings)){
+            throw new BizException(CategoryResponseType.CATEGORY_NOT_EXISTS);
+        }
+
+        member.updateCategories(categoryRepository.findByName(categoryStrings));
+    }
+
+
+    private Boolean checkValidateCategoryString(List<String> categories){
+        List<String> validateCategories = Arrays.asList("PM", "MARKETING", "DEVELOPMENT", "DESIGN", "BUSINESS", "IT");
+
+        for(String categoryString : categories){
+            if (!validateCategories.contains(categoryString)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Transactional
+    public String getProfileImageUrl(Member member) {
+        return member.getProfileImg();
+    }
+
+    @Transactional
+    public void syncProfileImageUrl(Member member) {
+        String url = S3_BUCKET_BASE_URL + "/"
+                + member.getIdentifier() + "/"
+                + IMAGE_NAME;
+
+        member.updateProfileImg(url);
+    }
+
+    @Transactional
+    public void initializeProfileImageUrl(Member member) {
+        String url = S3_BUCKET_BASE_URL + "/"
+                + DEFAULT_IMAGE_NAME;
+
+        member.updateProfileImg(url);
     }
 }
