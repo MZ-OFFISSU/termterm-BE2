@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.curation.CurationRegisterRequestDto;
 import server.api.termterm.response.BizException;
@@ -32,7 +33,6 @@ public class CurationController {
     @ApiOperation(value = "큐레이션 등록", notes = "큐레이션 등록")
     @ApiResponses({
             @ApiResponse(code = 2091, message = "큐레이션 등록 성공 (201)"),
-            @ApiResponse(code = 4091, message = "용어 ID 요청 형식이 잘못되었습니다. (400)"),
     })
     @PostMapping("/curation/register")
     public ResponseEntity<ResponseMessage<String>> registerCuration(
@@ -46,6 +46,23 @@ public class CurationController {
         curationService.registerCuration(curationRegisterRequestDto);
 
         return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_REGISTER_SUCCESS), CurationResponseType.CURATION_REGISTER_SUCCESS.getHttpStatus());
+    }
+
+    @ApiOperation(value = "큐레이션 북마크", notes = "큐레이션 북마크")
+    @ApiResponses({
+            @ApiResponse(code = 2093, message = "큐레이션 북마크 성공 (200)"),
+            @ApiResponse(code = 4092, message = "ID와 일치하는 큐레이션이 존재하지 않습니다. (404)"),
+    })
+    @PutMapping("/curation/bookmark/{id}")
+    public ResponseEntity<ResponseMessage<String>> bookmarkCuration(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @PathVariable("id") Long id
+    ){
+        Member member = memberService.getMemberByToken(token);
+        Curation curation = curationService.findById(id);
+        curationService.bookmarkCuration(member, curation);
+
+        return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_BOOKMARK_SUCCESS), CurationResponseType.CURATION_BOOKMARK_SUCCESS.getHttpStatus());
     }
 
 }
