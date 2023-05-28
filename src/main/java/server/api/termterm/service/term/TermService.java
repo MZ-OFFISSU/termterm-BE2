@@ -27,7 +27,13 @@ public class TermService {
     }
 
     public List<TermMinimumDto> searchTerm(Member member, String name) {
-        return termRepository.getSearchResults(member, name);
+        List<TermMinimumDto> termMinimumDtos = termRepository.getSearchResults(member, name)
+                .orElseThrow(() -> new BizException(TermResponseType.SEARCH_NO_RESULT));
+
+        if (termMinimumDtos.isEmpty())
+            throw new BizException(TermResponseType.SEARCH_NO_RESULT);
+
+        return termMinimumDtos;
     }
 
     public void bookmarkTerm(Member member, Long id) {
