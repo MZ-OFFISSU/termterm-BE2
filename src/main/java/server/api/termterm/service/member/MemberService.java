@@ -162,4 +162,9 @@ public class MemberService {
     public MemberInfoDto getMemberInfo(Member member){
         return MemberInfoDto.of(member);
     }
+
+    @Transactional
+    public Boolean checkDuplicateNickname(String nickname){
+        return memberRepository.existsByNicknameIgnoreCase(nickname);
+    }
 }
