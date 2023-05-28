@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CommentStatus {
-    ACCEPTED("A"),
-    DECISION_IN_PROCESS("D"),
-    REPORTED("R"),
+    ACCEPTED("ACCEPTED"),
+    WAITING("WAITING"),
+    REPORTED("REPORTED"),
     ;
 
     private final String status;
