@@ -209,4 +209,12 @@ public class MemberService {
     public String getProfileImageUrl(Member member) {
         return member.getProfileImg();
     }
+
+    public void syncProfileImageUrl(Member member) {
+        String url = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com/"
+                + member.getIdentifier()
+                + "/profile-image.jpg";
+
+        member.updateProfileImg(url);
+    }
 }

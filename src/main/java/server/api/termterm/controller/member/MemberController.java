@@ -95,10 +95,10 @@ public class MemberController {
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_GET_SUCCESS, profileImageUrl), MemberResponseType.MEMBER_INFO_GET_SUCCESS.getHttpStatus());
     }
 
-    @ApiOperation(value = "프로필사진 업로드 API 발급", notes = "AWS presigned-url을 이용, 클라이언트가 S3에 직접적으로 사진을 업로드 할 수 있는 API 발급. \n발급받은 API로 사진과 함께 PUT 요청을 보내고 성공하였으면, 서버의 /member/profile-image/sync 로 API 요청 부탁드립니다.")
+    @ApiOperation(value = "프로필사진 업로드 API 발급", notes = "AWS presigned-url을 이용, 클라이언트가 S3에 직접적으로 사진을 업로드 할 수 있는 API 발급. \n발급받은 API로 사진과 함께 PUT 요청을 보내고 성공하였으면, 서버의 \"/member/info/profile-image/sync\" 로 꼭!!! API 요청 부탁드립니다.")
     @ApiResponses({
-            @ApiResponse(code = 2081, message = "presigned-url 발급에 성공하였습니다. (200)"),
-            @ApiResponse(code = 4081, message = "presigned-url 발급에 실패하였습니다. (500)"),
+            @ApiResponse(code = 20801, message = "presigned-url 발급에 성공하였습니다. (200)"),
+            @ApiResponse(code = 40801, message = "presigned-url 발급에 실패하였습니다. (500)"),
     })
     @GetMapping("/member/info/profile-image/presigned-url")
     public ResponseEntity<ResponseMessage<String>> getPresignedUrl(
@@ -108,7 +108,20 @@ public class MemberController {
         String preSignedUrl = amazonS3Service.getPresignedUrl(member);
 
         return new ResponseEntity<>(ResponseMessage.create(AmazonS3ResponseType.PRESIGNED_URL_ISSUANCE_SUCCESS, preSignedUrl), AmazonS3ResponseType.PRESIGNED_URL_ISSUANCE_SUCCESS.getHttpStatus());
+    }
 
+    @ApiOperation(value = "DB에 사용자의 프로필이미지 주소 동기화", notes = "presigned-url을 통해 프로필 이미지가 S3에 정상적으로 업로드 되었으면, 해당 이미지 주소를 DB에도 반영")
+    @ApiResponses({
+            @ApiResponse(code = 20106, message = "데이터베이스에 사용자 프로필이미지 동기화 성공 (200)"),
+    })
+    @GetMapping("/member/info/profile-image/sync")
+    public ResponseEntity<ResponseMessage<String>> syncProfileImageUrl(
+            @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        memberService.syncProfileImageUrl(member);
+
+        return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.SYNC_SUCCESS), MemberResponseType.SYNC_SUCCESS.getHttpStatus());
     }
 
 
