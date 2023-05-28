@@ -13,7 +13,9 @@ import server.api.termterm.dto.member.MemberCategoriesUpdateRequestDto;
 import server.api.termterm.dto.member.MemberInfoDto;
 import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 import server.api.termterm.response.ResponseMessage;
+import server.api.termterm.response.amazonS3.AmazonS3ResponseType;
 import server.api.termterm.response.member.MemberResponseType;
+import server.api.termterm.service.amazonS3.AmazonS3Service;
 import server.api.termterm.service.member.MemberService;
 
 import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
@@ -27,6 +29,7 @@ import static io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY;
 public class MemberController {
 
     private final MemberService memberService;
+    private final AmazonS3Service amazonS3Service;
 
     @ApiOperation(value = "회원정보 조회", notes = "회원정보 조회")
     @ApiResponses({
@@ -90,6 +93,22 @@ public class MemberController {
         String profileImageUrl = memberService.getProfileImageUrl(member);
 
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_GET_SUCCESS, profileImageUrl), MemberResponseType.MEMBER_INFO_GET_SUCCESS.getHttpStatus());
+    }
+
+    @ApiOperation(value = "프로필사진 업로드 API 발급", notes = "AWS presigned-url을 이용, 클라이언트가 S3에 직접적으로 사진을 업로드 할 수 있는 API 발급. \n발급받은 API로 사진과 함께 PUT 요청을 보내고 성공하였으면, 서버의 /member/profile-image/sync 로 API 요청 부탁드립니다.")
+    @ApiResponses({
+            @ApiResponse(code = 2081, message = "presigned-url 발급에 성공하였습니다. (200)"),
+            @ApiResponse(code = 4081, message = "presigned-url 발급에 실패하였습니다. (500)"),
+    })
+    @GetMapping("/member/info/profile-image/presigned-url")
+    public ResponseEntity<ResponseMessage<String>> getPresignedUrl(
+            @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        String preSignedUrl = amazonS3Service.getPresignedUrl(member);
+
+        return new ResponseEntity<>(ResponseMessage.create(AmazonS3ResponseType.PRESIGNED_URL_ISSUANCE_SUCCESS, preSignedUrl), AmazonS3ResponseType.PRESIGNED_URL_ISSUANCE_SUCCESS.getHttpStatus());
+
     }
 
 
