@@ -21,6 +21,7 @@ import server.api.termterm.service.term.TermService;
 import java.util.List;
 
 import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.PATH;
 
 @Api(tags = "Term")
 @RestController
@@ -67,12 +68,13 @@ public class TermController {
     @GetMapping("/term/bookmark/{id}")
     public ResponseEntity<ResponseMessage<String>> bookmarkTerm(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
-            @PathVariable(value = "id") Long id
+            @Parameter(name = "id", description = "term id", in = PATH, required = true) @PathVariable(value = "id") Long id
     ){
         Member member = memberService.getMemberByToken(token);
         termService.bookmarkTerm(member, id);
 
         return new ResponseEntity<>(ResponseMessage.create(TermResponseType.BOOKMARK_SUCCESS), TermResponseType.BOOKMARK_SUCCESS.getHttpStatus());
     }
+
 
 }

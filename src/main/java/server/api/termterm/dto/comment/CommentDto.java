@@ -13,5 +13,6 @@ public class CommentDto {
     private Integer likeCnt;
     private String authorName;
     private String authorJob;
+    private String authorProfileImageUrl;
     private String createdDate;
 }
