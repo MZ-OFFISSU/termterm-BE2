@@ -18,5 +18,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //            "where m.account = :account")
 //    Optional<MemberInfoDto> getMemberInfoDtoByAccount(@Param("account") String account);
     Boolean existsBySocialIdAndEmail(String socialId, String email);
+    Boolean existsByNicknameIgnoreCase(String nickname);
 
 }

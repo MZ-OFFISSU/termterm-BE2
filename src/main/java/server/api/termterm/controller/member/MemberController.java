@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,8 @@ import server.api.termterm.dto.member.MemberInfoDto;
 import server.api.termterm.response.ResponseMessage;
 import server.api.termterm.response.member.MemberResponseType;
 import server.api.termterm.service.member.MemberService;
+
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY;
 
 
 @Api(tags = "Member")
@@ -50,4 +53,18 @@ public class MemberController {
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.WITHDRAWAL_SUCCESS), MemberResponseType.WITHDRAWAL_SUCCESS.getHttpStatus());
     }
 
+    @ApiOperation(value = "닉네임 중복 체크", notes = "닉네임 중복체크")
+    @ApiResponses({
+            @ApiResponse(code = 2024, message = "사용 가능한 닉네임입니다. (200)"),
+            @ApiResponse(code = 4026, message = "이미 사용중인 닉네임입니다. (400)"),
+    })
+    @GetMapping("/member/nickname/check")
+    public ResponseEntity<ResponseMessage<String>> isNicknameDuplicated(
+            @Parameter(name = "nickname", description = "String: 바꾸고자 하는 닉네임", in = QUERY) @RequestParam String nickname
+    ){
+        if(memberService.checkDuplicateNickname(nickname))
+            return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.DUPLICATE_NICKNAME), MemberResponseType.DUPLICATE_NICKNAME.getHttpStatus());
+        else
+            return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.NOT_DUPLICATED_NICKNAME), MemberResponseType.NOT_DUPLICATED_NICKNAME.getHttpStatus());
+    }
 }
