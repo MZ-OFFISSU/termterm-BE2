@@ -20,10 +20,7 @@ import server.api.termterm.repository.*;
 import server.api.termterm.response.BizException;
 import server.api.termterm.response.curation.CurationResponseType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -118,16 +115,12 @@ public class CurationService {
         return termSimpleDtos;
     }
 
-    private Category getRandomCategory(List<Category> categories){
-        Random randomGenerator = new Random();
-        return categories.get(randomGenerator.nextInt(categories.size()));
-    }
-
     // 함께 보면 더 좋은 용어 모음집
-    private Set<CurationSimpleInfoDto> getCurationSimpleInfoDtos(Curation curation){
-        Category category = getRandomCategory(curation.getCategories());
+    private List<CurationSimpleInfoDto> getCurationSimpleInfoDtos(Member member, Category category){
+        List<CurationSimpleInfoDto> ret = curationRepository.getCurationSimpleInfoDtoByCategory(member.getId(), category.getId());
+        Collections.shuffle(ret);
 
-        return curationRepository.getCurationSimpleInfoDtoByCategory(category.getId());
+        return ret;
     }
 
     private List<String> getTagStrings(List<Tag> tags){
@@ -143,7 +136,7 @@ public class CurationService {
     @Transactional(readOnly = true)
     public CurationDetailDto getCurationDetail(Member member, Curation curation, Boolean memberPaid) {
         List<TermSimpleDto> termSimpleDtos = getTermSimpleDtos(member, curation.getTerms());
-        Set<CurationSimpleInfoDto> curationSimpleInfoDtos = getCurationSimpleInfoDtos(curation);
+        List<CurationSimpleInfoDto> curationSimpleInfoDtos = getCurationSimpleInfoDtos(member, getRandomCategory(curation.getCategories()));
         List<String> tagStrings = getTagStrings(curation.getTags());
 
         return CurationDetailDto.builder()
@@ -152,5 +145,22 @@ public class CurationService {
                 .termSimples(termSimpleDtos)
                 .tags(tagStrings)
                 .build();
+    }
+
+    private Category getRandomCategory(List<Category> categories){
+        Random randomGenerator = new Random();
+        return categories.get(randomGenerator.nextInt(categories.size()));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CurationSimpleInfoDto> getRecommendedCurations(Member member) {
+        return getCurationSimpleInfoDtos(member, getRandomCategory(member.getCategories()));
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<CurationSimpleInfoDto> getCurationsByCategory(Member member, String categoryName) {
+        Category category = categoryRepository.findByNameIgnoreCase(categoryName);
+        return getCurationSimpleInfoDtos(member, category);
     }
 }

@@ -12,4 +12,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("select c from Category c where c.name IN :names")
     List<Category> findByNames(@Param("names") List<String> names);
+
+    Category findByNameIgnoreCase(String name);
 }

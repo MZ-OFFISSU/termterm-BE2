@@ -13,6 +13,7 @@ import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.curation.CurationDetailDto;
 import server.api.termterm.dto.curation.CurationRegisterRequestDto;
+import server.api.termterm.dto.curation.CurationSimpleInfoDto;
 import server.api.termterm.response.BizException;
 import server.api.termterm.response.ResponseMessage;
 import server.api.termterm.response.curation.CurationResponseType;
@@ -20,7 +21,9 @@ import server.api.termterm.response.member.MemberResponseType;
 import server.api.termterm.service.curation.CurationService;
 import server.api.termterm.service.member.MemberService;
 
-import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
+import java.util.List;
+
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.*;
 
 @Api(tags = "Curation")
 @RestController
@@ -104,6 +107,24 @@ public class CurationController {
         CurationDetailDto curationDetailDto = curationService.getCurationDetail(member, curation, memberPaid);
 
         return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_DETAIL_RETURN_SUCCESS, curationDetailDto), CurationResponseType.CURATION_LIST_RETURN_SUCCESS.getHttpStatus());
+    }
+
+    @ApiOperation(value = "카테고리별 큐레이션 리스트", notes = "카테고리별 큐레이션 리스트 리턴\ncategory에 아무것도 넣지 않을 경우 추천 큐레이션")
+    @ApiResponses({
+            @ApiResponse(code = 2095, message = "큐레이션 리스트 응답 성공 (200)"),
+            @ApiResponse(code = 4101, message = "카테고리가 존재하지 않습니다. (404)"),
+    })
+    @GetMapping("/curation/list")
+    public ResponseEntity<ResponseMessage<List<CurationSimpleInfoDto>>> getCurationsByCategory(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "category", description = "String : X / pm / marketing / development / design / business / IT", in = QUERY) @RequestParam(value = "category", required = false) String categoryName
+    ){
+        Member member = memberService.getMemberByToken(token);
+
+        List<CurationSimpleInfoDto> curationSimpleInfoDtos =
+                (categoryName == null) ?  curationService.getRecommendedCurations(member) : curationService.getCurationsByCategory(member, categoryName);
+
+        return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_LIST_RETURN_SUCCESS, curationSimpleInfoDtos), CurationResponseType.CURATION_LIST_RETURN_SUCCESS.getHttpStatus());
     }
 
 }

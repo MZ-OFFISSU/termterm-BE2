@@ -6,16 +6,17 @@ import org.springframework.data.repository.query.Param;
 import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.dto.curation.CurationSimpleInfoDto;
 
-import java.util.Set;
+import java.util.List;
 
 public interface CurationRepository extends JpaRepository<Curation, Long> {
 
-    @Query(value = "select new server.api.termterm.dto.curation.CurationSimpleInfoDto(c.id, c.title, c.description, c.cnt, cb.status) " +
-            "from Curation c " +
-            "inner join c.categories cc " +
-            "on c.id = cc.id " +
-            "inner join CurationBookmark cb " +
-            "on c.id = cb.id " +
-            "where cc.id = :id")
-    Set<CurationSimpleInfoDto> getCurationSimpleInfoDtoByCategory(@Param("id") Long id);
+    @Query(nativeQuery = true,
+            value = "select c.curation_id as curationId, c.title, c.description, c.cnt, cb.status as bookmarked " +
+                    "from curation c " +
+                    "left join curation_bookmark cb " +
+                    "on cb.curation_id = c.curation_id and cb.member_id = :memberId " +
+                    "left join curation_category cc " +
+                    "on c.curation_id = cc.curation_id " +
+                    "where cc.category_id = :categoryId")
+    List<CurationSimpleInfoDto> getCurationSimpleInfoDtoByCategory(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 }

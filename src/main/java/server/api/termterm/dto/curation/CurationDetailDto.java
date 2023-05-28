@@ -5,7 +5,6 @@ import lombok.Getter;
 import server.api.termterm.dto.term.TermSimpleDto;
 
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Builder
@@ -17,7 +16,7 @@ public class CurationDetailDto {
     private List<TermSimpleDto> termSimples;
 
      //함께 보면 더 좋은 용어 모음집
-    private Set<CurationSimpleInfoDto> curationSimpleInfos;
+    private List<CurationSimpleInfoDto> curationSimpleInfos;
 
      // 연관태그
     private List<String> tags;
