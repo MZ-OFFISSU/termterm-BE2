@@ -65,6 +65,7 @@ public class MemberController {
     @ApiOperation(value = "관심사 업데이트", notes = "사용자의 관심사 업데이트\n{\n\"categories\": [\n\"PM\", \"DESIGN\", \"BUSINESS\"\n]\n}")
     @ApiResponses({
             @ApiResponse(code = 2026, message = "사용자 관심사 업데이트 성공 (200)"),
+            @ApiResponse(code = 4101, message = "카테고리가 존재하지 않음 (400)"),
     })
     @PutMapping("/member/info/category")
     public ResponseEntity<ResponseMessage> updateMemberCategories(
