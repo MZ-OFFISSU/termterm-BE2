@@ -16,8 +16,6 @@ public enum CurationResponseType implements BaseResponseType {
     CURATION_LIST_RETURN_SUCCESS(2095, "큐레이션 리스트 응답 성공", HttpStatus.OK),
     CURATION_DETAIL_RETURN_SUCCESS(2096, "큐레이션 디테일 응답 성공", HttpStatus.OK),
 
-
-    TERM_IDS_MALFORMED(4091, "용어 ID 요청 형식이 잘못되었습니다.", HttpStatus.BAD_REQUEST),
     CURATION_DOESNT_EXIST(4092, "ID와 일치하는 큐레이션이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     CURATION_NOT_BOOKMARKED(4093, "북마크가 되어있지 않아 취소를 할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ;

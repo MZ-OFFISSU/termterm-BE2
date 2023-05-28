@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import server.api.termterm.domain.bookmark.CurationBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.domain.curation.Tag;
+import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.curation.CurationRegisterRequestDto;
-import server.api.termterm.repository.CategoryRepository;
-import server.api.termterm.repository.CurationRepository;
-import server.api.termterm.repository.TagRepository;
-import server.api.termterm.repository.TermRepository;
+import server.api.termterm.repository.*;
 import server.api.termterm.response.BizException;
 import server.api.termterm.response.curation.CurationResponseType;
 
@@ -27,6 +26,8 @@ public class CurationService {
     private final TermRepository termRepository;
     private final TagRepository tagRepository;
     private final CategoryRepository categoryRepository;
+    private final CurationBookmarkRepository curationBookmarkRepository;
+
 
     @Transactional(readOnly = true)
     public Curation findById(Long curationId){
@@ -66,5 +67,28 @@ public class CurationService {
 
         curation.synchronizeCnt();
         curationRepository.save(curation);
+    }
+
+    @Transactional
+    public void bookmarkCuration(Member member, Curation curation) {
+        CurationBookmark curationBookmark = curationBookmarkRepository.findByCurationAndMember(curation, member);
+
+        if(curationBookmark == null){
+            curationBookmarkRepository.save(new CurationBookmark(member, curation));
+            return;
+        }
+
+        curationBookmark.bookmark();
+    }
+
+    @Transactional
+    public void unbookmarkCuration(Member member, Curation curation) {
+        CurationBookmark curationBookmark = curationBookmarkRepository.findByCurationAndMember(curation, member);
+
+        if(curationBookmark == null){
+            throw new BizException(CurationResponseType.CURATION_NOT_BOOKMARKED);
+        }
+
+        curationBookmark.unbookmark();
     }
 }
