@@ -3,7 +3,11 @@ package server.api.termterm.dto.member;
 
 import lombok.Builder;
 import lombok.Getter;
+import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.member.Member;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -18,9 +22,11 @@ public class MemberInfoDto {
     private String introduction;
     private Integer point;
     private Integer yearCareer;
-//    private List<CategoryDto> categories = new ArrayList<>();
+    private List<String> categories;
 
     public static MemberInfoDto of(Member member){
+        List<String> categories = member.getCategories().stream().map(Category::getName).collect(Collectors.toList());
+
         return MemberInfoDto.builder()
                 .memberId(member.getId())
                 .name(member.getName())
@@ -32,6 +38,7 @@ public class MemberInfoDto {
                 .introduction(member.getIntroduction())
                 .point(member.getPoint())
                 .yearCareer(member.getYearCareer())
+                .categories(categories)
                 .build();
     }
 }
