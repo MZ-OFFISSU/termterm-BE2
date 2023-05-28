@@ -34,9 +34,9 @@ public class MemberService {
     private final CategoryRepository categoryRepository;
     private final JwtProvider jwtProvider;
 
-    private final String S3_BUCKET_BASE_URL = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com";
-    private final String IMAGE_NAME = "profile-image.jpg";
-    private final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
+    private static final String S3_BUCKET_BASE_URL = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com";
+    private static final String IMAGE_NAME = "profile-image.jpg";
+    private static final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
 
     @Transactional
     public TokenDto issueToken(Member member) {
@@ -193,7 +193,7 @@ public class MemberService {
             throw new BizException(CategoryResponseType.CATEGORY_NOT_EXISTS);
         }
 
-        member.updateCategories(categoryRepository.findByName(categoryStrings));
+        member.updateCategories(categoryRepository.findByNames(categoryStrings));
     }
 
 

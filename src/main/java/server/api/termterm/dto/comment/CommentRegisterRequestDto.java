@@ -1,4 +1,4 @@
-package server.api.termterm.response.comment;
+package server.api.termterm.dto.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

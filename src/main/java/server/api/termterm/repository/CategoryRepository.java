@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query("select c from Category c " +
-            "where c.name IN :names")
-    List<Category> findByName(@Param("names") List<String> names);
+    @Query("select c from Category c where c.name IN :names")
+    List<Category> findByNames(@Param("names") List<String> names);
 }

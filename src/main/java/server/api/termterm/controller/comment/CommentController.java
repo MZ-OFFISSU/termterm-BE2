@@ -15,7 +15,7 @@ import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.report.ReportRequestDto;
 import server.api.termterm.response.BizException;
 import server.api.termterm.response.ResponseMessage;
-import server.api.termterm.response.comment.CommentRegisterRequestDto;
+import server.api.termterm.dto.comment.CommentRegisterRequestDto;
 import server.api.termterm.response.comment.CommentResponseType;
 import server.api.termterm.response.member.MemberResponseType;
 import server.api.termterm.response.report.ReportResponseType;

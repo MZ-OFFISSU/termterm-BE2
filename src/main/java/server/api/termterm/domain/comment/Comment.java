@@ -28,7 +28,7 @@ public class Comment extends BaseTimeEntity {
     private String content;
     private String source;
 
-    private Integer likeCnt = 0;
+    private Integer likeCnt;
 
     @Enumerated(EnumType.STRING)
     private CommentStatus status;
