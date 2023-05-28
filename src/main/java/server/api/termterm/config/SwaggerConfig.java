@@ -19,7 +19,7 @@ public class SwaggerConfig {
     private ApiInfo swaggerInfo(){
         return new ApiInfoBuilder()
                 .title("termterm API")
-                .version("2.0.0")
+                .version("1.0.0")
                 .description("TERMTERM API Docs \n " +
                         "API 테스트시 헤더에 \"Bearer\" 를 입력하고 access token을 입력해야 합니다.\n")
                 .build();
