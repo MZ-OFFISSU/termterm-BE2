@@ -1,8 +1,9 @@
-package server.api.termterm.domain.curation;
+package server.api.termterm.domain.bookmark;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.domain.member.Member;
 
 import javax.persistence.*;
@@ -27,20 +28,20 @@ public class CurationBookmark {
     private Curation curation;
 
     @Enumerated(EnumType.STRING)
-    private CurationBookmarkStatus status;
+    private BookmarkStatus status;
 
     @Builder
     public CurationBookmark(Member member, Curation curation){
         this.member = member;
         this.curation = curation;
-        this.status = CurationBookmarkStatus.YES;
+        this.status = BookmarkStatus.YES;
     }
 
     public void unbookmark(){
-        this.status = CurationBookmarkStatus.NO;
+        this.status = BookmarkStatus.NO;
     }
 
     public void bookmark(){
-        this.status = CurationBookmarkStatus.YES;
+        this.status = BookmarkStatus.YES;
     }
 }
