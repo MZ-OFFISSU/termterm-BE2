@@ -2,6 +2,7 @@ package server.api.termterm.domain.term;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.comment.Comment;
 import server.api.termterm.domain.curation.Curation;
@@ -38,5 +39,8 @@ public class Term {
 
     @ManyToMany(mappedBy = "terms")
     private List<Curation> curations;
+
+    @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TermBookmark> termBookmarks = new ArrayList<>();
 
 }

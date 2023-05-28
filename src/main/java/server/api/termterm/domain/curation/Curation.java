@@ -3,6 +3,7 @@ package server.api.termterm.domain.curation;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import server.api.termterm.domain.bookmark.CurationBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.term.Term;
 

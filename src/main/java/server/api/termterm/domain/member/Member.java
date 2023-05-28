@@ -5,10 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import server.api.termterm.controller.auth.SocialLoginType;
+import server.api.termterm.domain.bookmark.CurationBookmark;
+import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.comment.Comment;
 import server.api.termterm.domain.comment.CommentLike;
-import server.api.termterm.domain.curation.CurationBookmark;
 import server.api.termterm.domain.curation.CurationPaid;
 import server.api.termterm.domain.report.Report;
 import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
@@ -62,6 +63,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CurationBookmark> curationBookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TermBookmark> termBookmarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CurationPaid> curationPaids = new ArrayList<>();

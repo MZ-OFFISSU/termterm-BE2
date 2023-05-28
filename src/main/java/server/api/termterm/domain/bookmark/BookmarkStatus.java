@@ -1,11 +1,11 @@
-package server.api.termterm.domain.curation;
+package server.api.termterm.domain.bookmark;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum CurationBookmarkStatus {
+public enum BookmarkStatus {
     YES("Y"),
     NO("N"),
     ;
