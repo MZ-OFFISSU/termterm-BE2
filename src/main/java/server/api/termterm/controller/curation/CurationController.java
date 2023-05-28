@@ -65,4 +65,22 @@ public class CurationController {
         return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_BOOKMARK_SUCCESS), CurationResponseType.CURATION_BOOKMARK_SUCCESS.getHttpStatus());
     }
 
+    @ApiOperation(value = "큐레이션 북마크 취소", notes = "큐레이션 북마크 취소")
+    @ApiResponses({
+            @ApiResponse(code = 2094, message = "큐레이션 북마크 취소 성공 (200)"),
+            @ApiResponse(code = 4092, message = "ID와 일치하는 큐레이션이 존재하지 않습니다. (404)"),
+            @ApiResponse(code = 4093, message = "북마크가 되어있지 않아 취소를 할 수 없습니다. (400)"),
+    })
+    @PutMapping("/curation/unbookmark/{id}")
+    public ResponseEntity<ResponseMessage<String>> unbookmarkCuration(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @PathVariable("id") Long id
+    ){
+        Member member = memberService.getMemberByToken(token);
+        Curation curation = curationService.findById(id);
+        curationService.unbookmarkCuration(member, curation);
+
+        return new ResponseEntity<>(ResponseMessage.create(CurationResponseType.CURATION_UNBOOKMARK_SUCCESS), CurationResponseType.CURATION_UNBOOKMARK_SUCCESS.getHttpStatus());
+    }
+
 }

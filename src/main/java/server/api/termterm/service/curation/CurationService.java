@@ -69,6 +69,7 @@ public class CurationService {
         curationRepository.save(curation);
     }
 
+    @Transactional
     public void bookmarkCuration(Member member, Curation curation) {
         CurationBookmark curationBookmark = curationBookmarkRepository.findByCurationAndMember(curation, member);
 
@@ -78,5 +79,16 @@ public class CurationService {
         }
 
         curationBookmark.bookmark();
+    }
+
+    @Transactional
+    public void unbookmarkCuration(Member member, Curation curation) {
+        CurationBookmark curationBookmark = curationBookmarkRepository.findByCurationAndMember(curation, member);
+
+        if(curationBookmark == null){
+            throw new BizException(CurationResponseType.CURATION_NOT_BOOKMARKED);
+        }
+
+        curationBookmark.unbookmark();
     }
 }
