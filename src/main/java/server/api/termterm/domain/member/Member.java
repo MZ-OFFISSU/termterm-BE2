@@ -5,6 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import server.api.termterm.controller.auth.SocialLoginType;
+import server.api.termterm.domain.category.Category;
+import server.api.termterm.domain.comment.Comment;
+import server.api.termterm.domain.comment.CommentLike;
+import server.api.termterm.domain.curation.CurationBookmark;
+import server.api.termterm.domain.curation.CurationPaid;
+import server.api.termterm.domain.report.Report;
+import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -38,6 +45,27 @@ public class Member {
     private String identifier;
     private String refreshToken;
 
+    @ManyToMany
+    @JoinTable(name = "MEMBER_CATEGORY",
+            joinColumns = @JoinColumn(name = "MEMBER_ID"),
+            inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
+    private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<CommentLike> commentLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<Report> reports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurationBookmark> curationBookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CurationPaid> curationPaids = new ArrayList<>();
+
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Builder.Default
     private List<Authority> roles = new ArrayList<>();
@@ -62,4 +90,27 @@ public class Member {
         this.yearCareer = 0;
         this.identifier = null;
     }
+
+    public Member updateInfo(MemberInfoUpdateRequestDto memberInfoUpdateRequestDto){
+        this.nickname = memberInfoUpdateRequestDto.getNickname();
+        this.domain = memberInfoUpdateRequestDto.getDomain();
+        this.job = memberInfoUpdateRequestDto.getJob();
+        this.yearCareer = memberInfoUpdateRequestDto.getYearCareer();
+        this.introduction = memberInfoUpdateRequestDto.getIntroduction();
+
+        return this;
+    }
+
+    public Member updateProfileImg(String profileImg){
+        this.profileImg = profileImg;
+
+        return this;
+    }
+
+    public Member updateCategories(List<Category> categories){
+        this.categories = categories;
+
+        return this;
+    }
+
 }

@@ -9,11 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.api.termterm.domain.member.Member;
+import server.api.termterm.dto.member.MemberCategoriesUpdateRequestDto;
 import server.api.termterm.dto.member.MemberInfoDto;
+import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 import server.api.termterm.response.ResponseMessage;
 import server.api.termterm.response.member.MemberResponseType;
 import server.api.termterm.service.member.MemberService;
 
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
 import static io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY;
 
 
@@ -39,6 +42,42 @@ public class MemberController {
 
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_GET_SUCCESS, memberInfoDto), MemberResponseType.MEMBER_INFO_GET_SUCCESS.getHttpStatus());
     }
+
+    @ApiOperation(value = "사용자 정보 수정", notes = "사용자 정보 수정.\n프로필 이미지 변경은 API 따로 개발")
+    @ApiResponses({
+            @ApiResponse(code = 2023, message = "사용자 정보 수정 성공 (200)"),
+            @ApiResponse(code = 4026, message = "이미 사용중인 닉네임입니다. (400)"),
+    })
+    @PutMapping("/member/info")
+    public ResponseEntity<ResponseMessage<String>> updateMemberInfo(
+            @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "MemberInfoUpdateRequestDto", description = "String : domain/introduction(소개)/job/nickname,  Integer : yearCareer(연차)") @RequestBody MemberInfoUpdateRequestDto memberInfoUpdateRequestDto
+    ){
+        Member member = memberService.getMemberByToken(token);
+        if (memberService.checkDuplicateNickname(memberInfoUpdateRequestDto.getNickname())){
+            return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.DUPLICATE_NICKNAME), MemberResponseType.DUPLICATE_NICKNAME.getHttpStatus());
+        }
+
+        memberService.updateMemberInfo(member, memberInfoUpdateRequestDto);
+        return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS), MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS.getHttpStatus());
+    }
+
+    @ApiOperation(value = "관심사 업데이트", notes = "사용자의 관심사 업데이트\n{\n\"categories\": [\n\"PM\", \"DESIGN\", \"BUSINESS\"\n]\n}")
+    @ApiResponses({
+            @ApiResponse(code = 2026, message = "사용자 관심사 업데이트 성공 (200)"),
+    })
+    @PutMapping("/member/info/category")
+    public ResponseEntity<ResponseMessage> updateMemberCategories(
+            @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "MemberCategoriesRequestDto", description = "") @RequestBody MemberCategoriesUpdateRequestDto memberCategoriesUpdateRequestDto
+    ){
+        Member member = memberService.getMemberByToken(token);
+        memberService.updateMemberCategories(member, memberCategoriesUpdateRequestDto);
+
+        return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS), MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS.getHttpStatus());
+    }
+
+
 
     @ApiOperation(value = "회원 탈퇴", notes = "회원 탈퇴")
     @ApiResponses({

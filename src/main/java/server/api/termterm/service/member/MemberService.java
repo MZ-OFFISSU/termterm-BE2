@@ -5,21 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.jwt.Token;
 import server.api.termterm.domain.member.Authority;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.jwt.TokenDto;
 import server.api.termterm.dto.member.BaseMemberInfoDto;
+import server.api.termterm.dto.member.MemberCategoriesUpdateRequestDto;
 import server.api.termterm.dto.member.MemberInfoDto;
+import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 import server.api.termterm.jwt.JwtProvider;
+import server.api.termterm.repository.CategoryRepository;
 import server.api.termterm.repository.MemberRepository;
 import server.api.termterm.repository.TokenRepository;
 import server.api.termterm.response.BizException;
+import server.api.termterm.response.category.CategoryResponseType;
 import server.api.termterm.response.jwt.JwtResponseType;
 import server.api.termterm.response.member.MemberResponseType;
 
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -28,6 +32,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final TokenRepository tokenRepository;
+    private final CategoryRepository categoryRepository;
     private final JwtProvider jwtProvider;
 
     @Transactional
@@ -166,5 +171,38 @@ public class MemberService {
     @Transactional
     public Boolean checkDuplicateNickname(String nickname){
         return memberRepository.existsByNicknameIgnoreCase(nickname);
+    }
+
+    @Transactional
+    public void updateMemberInfo(Member member, MemberInfoUpdateRequestDto memberInfoUpdateRequestDto) {
+        try {
+            member.updateInfo(memberInfoUpdateRequestDto);
+        }catch (Exception e){
+            throw new BizException(MemberResponseType.FAILED_INFO_UPDATE);
+        }
+    }
+
+    @Transactional
+    public void updateMemberCategories(Member member, MemberCategoriesUpdateRequestDto memberCategoriesUpdateRequestDto) {
+        List<String> categoryStrings = memberCategoriesUpdateRequestDto.getCategories();
+
+        if(!checkValidateCategoryString(categoryStrings)){
+            throw new BizException(CategoryResponseType.CATEGORY_NOT_EXISTS);
+        }
+
+        member.updateCategories(categoryRepository.findByName(categoryStrings));
+    }
+
+    private Boolean checkValidateCategoryString(List<String> categories){
+        List<String> validateCategories = Arrays.asList("PM", "MARKETING", "DEVELOPMENT", "DESIGN", "BUSINESS", "IT");
+
+        for(String categoryString : categories){
+            if (!validateCategories.contains(categoryString)){
+                return false;
+            }
+        }
+
+        return true;
+
     }
 }
