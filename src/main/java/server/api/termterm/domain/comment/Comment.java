@@ -27,6 +27,7 @@ public class Comment extends BaseTimeEntity {
 
     private String content;
     private String source;
+
     private Integer likeCnt = 0;
 
     @Enumerated(EnumType.STRING)
@@ -45,6 +46,11 @@ public class Comment extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
+
+    @PrePersist
+    public void setLikeCnt(){
+        this.likeCnt = 0;
+    }
 
     public void addLike(){
         this.likeCnt++;

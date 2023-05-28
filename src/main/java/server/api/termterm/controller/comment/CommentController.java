@@ -18,7 +18,7 @@ import server.api.termterm.service.comment.CommentService;
 import server.api.termterm.service.member.MemberService;
 import server.api.termterm.service.term.TermService;
 
-import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.*;
 
 @Api(tags = "Comment")
 @RestController
@@ -47,4 +47,20 @@ public class CommentController {
         return new ResponseEntity<>(ResponseMessage.create(CommentResponseType.POST_SUCCESS), CommentResponseType.POST_SUCCESS.getHttpStatus());
     }
 
+    @ApiOperation(value = "좋아요", notes = "나만의 용어 설명 좋아요")
+    @ApiResponses({
+            @ApiResponse(code = 2062, message = "용어 설명 좋아요 성공 (200)"),
+            @ApiResponse(code = 4061, message = "해당하는 나만의 용어 설명이 존재하지 않습니다. (400)"),
+            @ApiResponse(code = 4062, message = "사용자가 용어 설명에 이미 좋아요를 눌렀습니다. (400)"),
+    })
+    @PutMapping("/comment/like/{id}")
+    public ResponseEntity<ResponseMessage<String>> likeComment(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "id", description = "comment id", in = PATH)  @RequestParam(name = "id") Long id
+    ) {
+        Member member = memberService.getMemberByToken(token);
+        commentService.like(member, id);
+
+        return new ResponseEntity<>(ResponseMessage.create(CommentResponseType.LIKE_SUCCESS), CommentResponseType.LIKE_SUCCESS.getHttpStatus());
+    }
 }
