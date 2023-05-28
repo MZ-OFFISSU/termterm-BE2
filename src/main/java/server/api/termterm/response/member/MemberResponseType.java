@@ -30,6 +30,7 @@ public enum MemberResponseType implements BaseResponseType {
     WITHDRAWAL_SUCCESS(20104, "회원 탈퇴 성공", HttpStatus.OK),
     NOT_DUPLICATED_NICKNAME(20105, "사용할 수 있는 닉네임입니다.", HttpStatus.OK),
     SYNC_SUCCESS(20106, "데이터베이스에 사용자 프로필이미지 동기화 성공", HttpStatus.OK),
+    DELETE_PROFILE_IMAGE(20107, "사용자 프로필이미지 삭제 성공", HttpStatus.OK),
     ;
 
     private final Integer code;

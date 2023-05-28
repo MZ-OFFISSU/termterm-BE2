@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.jwt.Token;
 import server.api.termterm.domain.member.Authority;
 import server.api.termterm.domain.member.Member;
@@ -34,6 +33,10 @@ public class MemberService {
     private final TokenRepository tokenRepository;
     private final CategoryRepository categoryRepository;
     private final JwtProvider jwtProvider;
+
+    private final String S3_BUCKET_BASE_URL = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com";
+    private final String IMAGE_NAME = "profile-image.jpg";
+    private final String DEFAULT_IMAGE_NAME = "default-profile-image/profile_default.png";
 
     @Transactional
     public TokenDto issueToken(Member member) {
@@ -193,6 +196,7 @@ public class MemberService {
         member.updateCategories(categoryRepository.findByName(categoryStrings));
     }
 
+
     private Boolean checkValidateCategoryString(List<String> categories){
         List<String> validateCategories = Arrays.asList("PM", "MARKETING", "DEVELOPMENT", "DESIGN", "BUSINESS", "IT");
 
@@ -203,17 +207,26 @@ public class MemberService {
         }
 
         return true;
-
     }
 
+    @Transactional
     public String getProfileImageUrl(Member member) {
         return member.getProfileImg();
     }
 
+    @Transactional
     public void syncProfileImageUrl(Member member) {
-        String url = "https://termterm-bucket.s3.ap-northeast-2.amazonaws.com/"
-                + member.getIdentifier()
-                + "/profile-image.jpg";
+        String url = S3_BUCKET_BASE_URL + "/"
+                + member.getIdentifier() + "/"
+                + IMAGE_NAME;
+
+        member.updateProfileImg(url);
+    }
+
+    @Transactional
+    public void initializeProfileImageUrl(Member member) {
+        String url = S3_BUCKET_BASE_URL + "/"
+                + DEFAULT_IMAGE_NAME;
 
         member.updateProfileImg(url);
     }

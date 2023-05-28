@@ -54,7 +54,6 @@ public class AmazonS3Service {
 
     public void removeS3Image(Member member) {
         ObjectListing objectList = amazonS3Client.listObjects(S3_BUCKET, member.getIdentifier());
-
         List<S3ObjectSummary> objectSummaryList = objectList.getObjectSummaries();
 
         String[] keysList = new String[objectSummaryList.size()];
@@ -63,13 +62,7 @@ public class AmazonS3Service {
             keysList[count++] = summary.getKey();
         }
 
-        try {
-            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(S3_BUCKET).withKeys(keysList);
-            amazonS3Client.deleteObjects(deleteObjectsRequest);
-        }catch (AmazonS3Exception e){
-//            throw new BizException(MemberExceptionType.PROFILE_IMAGE_DOES_NOT_EXIST);
-            return;
-        }
-
+        DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(S3_BUCKET).withKeys(keysList);
+        amazonS3Client.deleteObjects(deleteObjectsRequest);
     }
 }

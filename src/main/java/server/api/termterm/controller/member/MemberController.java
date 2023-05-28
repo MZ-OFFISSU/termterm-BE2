@@ -48,8 +48,8 @@ public class MemberController {
 
     @ApiOperation(value = "사용자 정보 수정", notes = "사용자 정보 수정.\n프로필 이미지 변경은 API 따로 개발")
     @ApiResponses({
-            @ApiResponse(code = 2023, message = "사용자 정보 수정 성공 (200)"),
-            @ApiResponse(code = 4026, message = "이미 사용중인 닉네임입니다. (400)"),
+            @ApiResponse(code = 20103, message = "사용자 정보 수정 성공 (200)"),
+            @ApiResponse(code = 40106, message = "이미 사용중인 닉네임입니다. (400)"),
     })
     @PutMapping("/member/info")
     public ResponseEntity<ResponseMessage<String>> updateMemberInfo(
@@ -67,8 +67,8 @@ public class MemberController {
 
     @ApiOperation(value = "관심사 업데이트", notes = "사용자의 관심사 업데이트\n{\n\"categories\": [\n\"PM\", \"DESIGN\", \"BUSINESS\"\n]\n}")
     @ApiResponses({
-            @ApiResponse(code = 2026, message = "사용자 관심사 업데이트 성공 (200)"),
-            @ApiResponse(code = 4101, message = "카테고리가 존재하지 않음 (400)"),
+            @ApiResponse(code = 20103, message = "사용자 관심사 업데이트 성공 (200)"),
+            @ApiResponse(code = 41001, message = "카테고리가 존재하지 않음 (400)"),
     })
     @PutMapping("/member/info/category")
     public ResponseEntity<ResponseMessage<String>> updateMemberCategories(
@@ -83,7 +83,7 @@ public class MemberController {
 
     @ApiOperation(value = "프로필 사진 주소 리턴", notes = "프로필 사진 주소 리턴")
     @ApiResponses({
-            @ApiResponse(code = 2028, message = "사용자 프로필이미지 url 응답 성공 (200)"),
+            @ApiResponse(code = 20102, message = "사용자 프로필이미지 url 응답 성공 (200)"),
     })
     @GetMapping("/member/info/profile-image")
     public ResponseEntity<ResponseMessage<String>> getProfileImageUrl(
@@ -124,6 +124,20 @@ public class MemberController {
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.SYNC_SUCCESS), MemberResponseType.SYNC_SUCCESS.getHttpStatus());
     }
 
+    @ApiOperation(value = "프로필이미지 삭제", notes = "이미지를 삭제하고, 기본이미지로 변경")
+    @ApiResponses({
+            @ApiResponse(code = 20107, message = "사용자 프로필이미지 삭제 성공 (200)"),
+    })
+    @DeleteMapping("/member/info/profile-image")
+    public ResponseEntity<ResponseMessage<String>> deleteProfileImage(
+            @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        amazonS3Service.removeS3Image(member);
+        memberService.initializeProfileImageUrl(member);
+
+        return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.DELETE_PROFILE_IMAGE), MemberResponseType.DELETE_PROFILE_IMAGE.getHttpStatus());
+    }
 
     @ApiOperation(value = "회원 탈퇴", notes = "회원 탈퇴")
     @ApiResponses({
