@@ -205,4 +205,8 @@ public class MemberService {
         return true;
 
     }
+
+    public String getProfileImageUrl(Member member) {
+        return member.getProfileImg();
+    }
 }

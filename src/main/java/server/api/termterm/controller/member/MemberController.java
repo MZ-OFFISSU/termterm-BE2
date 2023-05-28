@@ -68,7 +68,7 @@ public class MemberController {
             @ApiResponse(code = 4101, message = "카테고리가 존재하지 않음 (400)"),
     })
     @PutMapping("/member/info/category")
-    public ResponseEntity<ResponseMessage> updateMemberCategories(
+    public ResponseEntity<ResponseMessage<String>> updateMemberCategories(
             @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token,
             @Parameter(name = "MemberCategoriesRequestDto", description = "") @RequestBody MemberCategoriesUpdateRequestDto memberCategoriesUpdateRequestDto
     ){
@@ -78,6 +78,19 @@ public class MemberController {
         return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS), MemberResponseType.MEMBER_INFO_UPDATE_SUCCESS.getHttpStatus());
     }
 
+    @ApiOperation(value = "프로필 사진 주소 리턴", notes = "프로필 사진 주소 리턴")
+    @ApiResponses({
+            @ApiResponse(code = 2028, message = "사용자 프로필이미지 url 응답 성공 (200)"),
+    })
+    @GetMapping("/member/info/profile-image")
+    public ResponseEntity<ResponseMessage<String>> getProfileImageUrl(
+            @Parameter(name = "Authorization", description = "Bearer {accessToken}", in = HEADER) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        String profileImageUrl = memberService.getProfileImageUrl(member);
+
+        return new ResponseEntity<>(ResponseMessage.create(MemberResponseType.MEMBER_INFO_GET_SUCCESS, profileImageUrl), MemberResponseType.MEMBER_INFO_GET_SUCCESS.getHttpStatus());
+    }
 
 
     @ApiOperation(value = "회원 탈퇴", notes = "회원 탈퇴")
