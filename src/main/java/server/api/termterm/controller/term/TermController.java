@@ -30,7 +30,7 @@ public class TermController {
     private final MemberService memberService;
     private final TermService termService;
 
-    @ApiOperation(value = "용어 검색", notes = "용어 검색")
+    @ApiOperation(value = "용어 검색", notes = "용어 검색\n 북마크 되어 있으면 YES, 안 되어 있으면 null")
     @ApiResponses({
             @ApiResponse(code = 2051, message = "용어 검색 성공 (200)"),
             @ApiResponse(code = 4051, message = "검색어에 대한 검색 결과가 없습니다. (400)"),

@@ -27,7 +27,7 @@ public class TermService {
     }
 
     public List<TermMinimumDto> searchTerm(Member member, String name) {
-        return null;
+        return termRepository.getSearchResults(member, name);
     }
 
     public void bookmarkTerm(Member member, Long id) {
