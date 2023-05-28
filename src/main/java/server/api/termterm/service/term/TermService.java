@@ -76,6 +76,7 @@ public class TermService {
                     .likeCnt(comment.getLikeCnt())
                     .authorName(comment.getMember().getNickname())
                     .authorJob(comment.getMember().getJob())
+                    .authorProfileImageUrl(comment.getMember().getProfileImg())
                     .createdDate(comment.getCreatedDate().toString())
                     .build();
 
