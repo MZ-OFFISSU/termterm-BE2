@@ -230,4 +230,8 @@ public class MemberService {
 
         member.updateProfileImg(url);
     }
+
+    public boolean checkAdmin(Member member) {
+        return member.getRoles().get(0).getName().equals("ROLE_ADMIN");
+    }
 }
