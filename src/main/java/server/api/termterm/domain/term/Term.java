@@ -9,9 +9,7 @@ import server.api.termterm.domain.curation.Curation;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -32,7 +30,7 @@ public class Term {
     @JoinTable(name = "TERM_CATEGORY",
             joinColumns = @JoinColumn(name = "TERM_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
-    private Set<Category> categories = new HashSet<>();
+    private List<Category> categories = new ArrayList<>();
 
     @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();

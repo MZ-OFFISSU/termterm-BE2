@@ -50,10 +50,10 @@ public class Member {
     @JoinTable(name = "MEMBER_CATEGORY",
             joinColumns = @JoinColumn(name = "MEMBER_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
-    private List<Category> categories = new ArrayList<>();
+    private List<Category> categories;
 
     @OneToMany(mappedBy = "member")
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "member")
     private List<CommentLike> commentLikes = new ArrayList<>();

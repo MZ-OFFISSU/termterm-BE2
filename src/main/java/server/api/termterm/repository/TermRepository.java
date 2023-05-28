@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.Term;
+import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TermRepository extends JpaRepository<Term, Long> {
     @Query("select new server.api.termterm.dto.term.TermMinimumDto(t.id, t.name, tb.status) " +
@@ -16,12 +18,12 @@ public interface TermRepository extends JpaRepository<Term, Long> {
             "left join TermBookmark tb " +
             "on t.id = tb.term.id and tb.member = :member " +
             "where t.name like concat('%', :name, '%')")
-    List<TermMinimumDto> getSearchResults(@Param("member") Member member, @Param("name") String name);
+    Optional<List<TermMinimumDto>> getSearchResults(@Param("member") Member member, @Param("name") String name);
 
+    @Query("select new server.api.termterm.dto.term.TermDto(t.id, t.name, t.description, t.source, tb.status, t) " +
+            "from Term t " +
+            "left join TermBookmark tb " +
+            "on t.id = tb.term.id and tb.member = :member " +
+            "where t.id = :id")
+    TermDto getTermDetail(@Param("member") Member member, @Param("id") Long id);
 }
-
-//    @Query(value = "select new server.api.termterm.dto.member.MemberInfoDto(" +
-//            "m.id, m.account)" +
-//            "from Member m " +
-//            "where m.account = :account")
-//    Optional<MemberInfoDto> getMemberInfoDtoByAccount(@Param("account") String account);
