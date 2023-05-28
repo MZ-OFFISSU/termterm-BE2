@@ -1,5 +1,6 @@
 package server.api.termterm.domain.curation;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +10,11 @@ import server.api.termterm.domain.term.Term;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class Curation {
@@ -40,7 +41,7 @@ public class Curation {
     @JoinTable(name = "CURATION_CATEGORY",
             joinColumns = @JoinColumn(name = "CURATION_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
-    private Set<Category> categories = new HashSet<>();
+    private List<Category> categories = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "CURATION_TERM",
@@ -51,15 +52,4 @@ public class Curation {
     public void synchronizeCnt(){
         this.cnt = this.terms.size();
     }
-
-    @Builder
-    public Curation(String title, String description, String thumbnail, List<Tag> tags, Set<Category> categories, List<Term> terms){
-        this.title = title;
-        this.description = description;
-        this.thumbnail = thumbnail;
-        this.tags = tags;
-        this.categories = categories;
-        this.terms = terms;
-    }
-
 }

@@ -26,4 +26,7 @@ public interface TermRepository extends JpaRepository<Term, Long> {
             "on t.id = tb.term.id and tb.member = :member " +
             "where t.id = :id")
     TermDto getTermDetail(@Param("member") Member member, @Param("id") Long id);
+
+    @Query("select t from Term t where t.id IN :ids")
+    List<Term> findByIds(@Param("ids") List<Long> ids);
 }
