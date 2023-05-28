@@ -78,4 +78,20 @@ public class CommentService {
         commentLike.like();
         comment.addLike();
     }
+
+    @Transactional
+    public void dislike(Member member, Long id) {
+        Comment comment = findById(id);
+        CommentLike commentLike = findByMemberAndComment(member, comment);
+
+        boolean existsCommentLike = commentLike != null;
+
+        // 사용자가 해당 커멘트에 좋아요를 누른 이력이 없거나 좋아요 취소 상태일 때
+        if(!existsCommentLike || commentLike.getStatus() == CommentLikeStatus.NO){
+            throw new BizException(CommentResponseType.DID_NOT_LIKED);
+        }
+
+        commentLike.dislike();
+        comment.subLike();
+    }
 }
