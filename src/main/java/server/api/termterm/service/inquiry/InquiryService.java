@@ -19,6 +19,12 @@ import server.api.termterm.response.inquiry.InquiryResponseType;
 public class InquiryService {
     private final InquiryRepository inquiryRepository;
 
+    @Transactional
+    public Inquiry findById(Long id){
+        return inquiryRepository.findById(id)
+                .orElseThrow(() -> new BizException(InquiryResponseType.INVALID_INQUIRY_ID));
+    }
+
     private InquiryType getInquiryTypeByName(String name){
         try{
             return InquiryType.getInquiryType(name);
@@ -36,5 +42,10 @@ public class InquiryService {
                 .build();
 
         inquiryRepository.save(inquiry);
+    }
+
+    @Transactional
+    public void completeInquiry(Long id) {
+        findById(id).complete();
     }
 }

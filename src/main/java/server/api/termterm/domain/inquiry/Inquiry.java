@@ -35,8 +35,8 @@ public class Inquiry extends BaseTimeEntity {
         this.type = type;
     }
 
-    public void setStatus(InquiryStatus status){
-        this.status = status;
+    public void complete(){
+        this.status = InquiryStatus.COMPLETED;
     }
 
 }
