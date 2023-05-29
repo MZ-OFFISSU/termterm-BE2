@@ -3,7 +3,7 @@ package server.api.termterm.domain.folder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import server.api.termterm.domain.BaseTimeEntity;
+import server.api.termterm.domain.basetime.BaseTimeEntity;
 import server.api.termterm.domain.member.Member;
 
 import javax.persistence.*;

@@ -5,13 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import server.api.termterm.domain.BaseTimeEntity;
+import server.api.termterm.domain.basetime.BaseTimeEntity;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.report.Report;
 import server.api.termterm.domain.term.Term;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -42,13 +41,13 @@ public class Comment extends BaseTimeEntity {
     private Member member;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<CommentLike> commentLikes;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Report> reports = new ArrayList<>();
+    private List<Report> reports;
 
     @PrePersist
-    public void setLikeCnt(){
+    public void initLikeCnt(){
         this.likeCnt = 0;
     }
 

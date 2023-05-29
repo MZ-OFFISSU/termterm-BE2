@@ -13,7 +13,7 @@ import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.Term;
 import server.api.termterm.repository.CommentLikeRepository;
 import server.api.termterm.repository.CommentRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.dto.comment.CommentRegisterRequestDto;
 import server.api.termterm.response.comment.CommentResponseType;
 

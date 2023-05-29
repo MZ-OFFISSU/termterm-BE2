@@ -16,7 +16,7 @@ public class CurationDetailDto {
     private List<TermSimpleDto> termSimples;
 
      //함께 보면 더 좋은 용어 모음집
-    private List<CurationSimpleInfoDto> curationSimpleInfos;
+    private List<CurationSimpleInfoDtoInterface> curationSimpleInfos;
 
      // 연관태그
     private List<String> tags;

@@ -1,4 +1,4 @@
-package server.api.termterm.controller.auth;
+package server.api.termterm.domain.member;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

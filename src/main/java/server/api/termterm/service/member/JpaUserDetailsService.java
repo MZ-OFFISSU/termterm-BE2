@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import server.api.termterm.domain.member.CustomUserDetails;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.repository.MemberRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.member.MemberResponseType;
 
 

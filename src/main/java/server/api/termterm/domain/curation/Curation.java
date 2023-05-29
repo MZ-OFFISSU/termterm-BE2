@@ -35,19 +35,19 @@ public class Curation {
     @JoinTable(name = "CURATION_TAG",
             joinColumns = @JoinColumn(name = "CURATION_ID"),
             inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
-    private List<Tag> tags = new ArrayList<>();
+    private List<Tag> tags;
 
     @ManyToMany
     @JoinTable(name = "CURATION_CATEGORY",
             joinColumns = @JoinColumn(name = "CURATION_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
-    private List<Category> categories = new ArrayList<>();
+    private List<Category> categories;
 
     @ManyToMany
     @JoinTable(name = "CURATION_TERM",
             joinColumns = @JoinColumn(name = "CURATION_ID"),
             inverseJoinColumns = @JoinColumn(name = "TERM_ID"))
-    private List<Term> terms = new ArrayList<>();
+    private List<Term> terms;
 
     public void synchronizeCnt(){
         this.cnt = this.terms.size();

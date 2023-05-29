@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import server.api.termterm.dto.jwt.TokenDto;
 import server.api.termterm.dto.member.BaseMemberInfoDto;
 import server.api.termterm.dto.member.KakaoMemberInfoDto;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.auth.AuthResponseType;
 
 import java.io.*;

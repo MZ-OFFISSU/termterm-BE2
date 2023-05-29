@@ -2,18 +2,17 @@ package server.api.termterm.controller.auth;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.api.termterm.domain.member.Member;
+import server.api.termterm.domain.member.SocialLoginType;
 import server.api.termterm.dto.jwt.TokenDto;
 import server.api.termterm.dto.member.BaseMemberInfoDto;
-import server.api.termterm.response.BizException;
-import server.api.termterm.response.ResponseMessage;
+import server.api.termterm.response.base.BizException;
+import server.api.termterm.response.base.ApiResponse;
 import server.api.termterm.response.auth.AuthResponseType;
 import server.api.termterm.response.jwt.JwtResponseType;
 import server.api.termterm.service.auth.AppleService;
@@ -39,15 +38,15 @@ public class AuthController {
 
     @ApiOperation(value = "소셜 로그인", notes = "카카오/구글/애플 소셜 로그인 요청. 회원가입이 안되어 있을경우 동시에 진행함. ")
     @ApiResponses({
-            @ApiResponse(code = 2011, message = "로그인 성공 (200)"),
-            @ApiResponse(code = 4021, message = "존재하지 않는 사용자 (400)"),
-            @ApiResponse(code = 4010, message = "요청에 인가코드가 존재하지 않음 (400)"),
-            @ApiResponse(code = 4012, message = "소셜 타입 경로가 유효하지 않음 (400)"),
-            @ApiResponse(code = 4013, message = "구글 서버와의 연결 실패 (504)"),
-            @ApiResponse(code = 4014, message = "카카오 서버와의 연결 실패 (505)"),
+            @io.swagger.annotations.ApiResponse(code = 2011, message = "로그인 성공 (200)"),
+            @io.swagger.annotations.ApiResponse(code = 4021, message = "존재하지 않는 사용자 (400)"),
+            @io.swagger.annotations.ApiResponse(code = 4010, message = "요청에 인가코드가 존재하지 않음 (400)"),
+            @io.swagger.annotations.ApiResponse(code = 4012, message = "소셜 타입 경로가 유효하지 않음 (400)"),
+            @io.swagger.annotations.ApiResponse(code = 4013, message = "구글 서버와의 연결 실패 (504)"),
+            @io.swagger.annotations.ApiResponse(code = 4014, message = "카카오 서버와의 연결 실패 (505)"),
     })
     @PostMapping("/auth/{socialType}")
-    public ResponseEntity<ResponseMessage<TokenDto>> auth(
+    public ApiResponse<TokenDto> auth(
             @Parameter(name = "auth-code", description = "카카오/구글/애플 로부터 받은 인가코드", in = HEADER) @RequestHeader(name = "auth-code") String authorizationCode,
             @Parameter(name = "socialType", description = "String: kakao/google/apple", in = PATH) @PathVariable("socialType") String socialType
     ){
@@ -55,33 +54,42 @@ public class AuthController {
             throw new BizException(AuthResponseType.NO_AUTHORIZATION_CODE);
         }
 
-        SocialAuthService socialAuthService = getSocialAuthServiceBySocialType(socialType);
+        SocialLoginType type = getSocialType(socialType);
+        SocialAuthService socialAuthService = getSocialAuthServiceBySocialType(type);
         TokenDto socialToken = socialAuthService.getToken(authorizationCode);
         BaseMemberInfoDto memberInfoDto = socialAuthService.getMemberInfo(socialToken);
 
-        Member member = memberService.getIsMember(memberInfoDto) ? memberService.getMember(memberInfoDto) : memberService.signup(memberInfoDto);
+        Member member = memberService.getIsMember(memberInfoDto) ? memberService.getMember(memberInfoDto) : memberService.signup(memberInfoDto, type);
         TokenDto serviceToken = memberService.issueToken(member);
 
-        return new ResponseEntity<>(ResponseMessage.create(AuthResponseType.LOGIN_SUCCESS, serviceToken), AuthResponseType.LOGIN_SUCCESS.getHttpStatus());
+        return ApiResponse.of(AuthResponseType.LOGIN_SUCCESS, serviceToken);
     }
 
     @ApiOperation(value = "토큰 재발급", notes = "토큰 재발급")
     @ApiResponses({
-            @ApiResponse(code = 20001, message = "토큰 재발급 성공 (200)"),
-            @ApiResponse(code = 40004, message = "리프레시 토큰 만료 (400) - 재 로그인 필요"),
-            @ApiResponse(code = 40101, message = "사용자를 찾을 수 없습니다. (404)"),
+            @io.swagger.annotations.ApiResponse(code = 20001, message = "토큰 재발급 성공 (200)"),
+            @io.swagger.annotations.ApiResponse(code = 40004, message = "리프레시 토큰 만료 (400) - 재 로그인 필요"),
+            @io.swagger.annotations.ApiResponse(code = 40101, message = "사용자를 찾을 수 없습니다. (404)"),
     })
     @PostMapping("/auth/token/refresh")
-    public ResponseEntity<ResponseMessage<TokenDto>> refresh(@RequestBody TokenDto token) {
+    public ApiResponse<TokenDto> refresh(@RequestBody TokenDto token) {
         TokenDto tokenDto = memberService.refreshAccessToken(token);
 
-        return new ResponseEntity<>(ResponseMessage.create(JwtResponseType.TOKEN_REISSUED, tokenDto), JwtResponseType.TOKEN_REISSUED.getHttpStatus());
+        return ApiResponse.of(JwtResponseType.TOKEN_REISSUED, tokenDto);
     }
 
-    private SocialAuthService getSocialAuthServiceBySocialType(String type){
-        if(type.equals(SocialLoginType.KAKAO.getValue()))           return kakaoService;
-        else if(type.equals(SocialLoginType.GOOGLE.getValue()))     return googleService;
-        else if(type.equals(SocialLoginType.APPLE.getValue()))      return appleService;
+    private SocialLoginType getSocialType(String type){
+        if(type.equals(SocialLoginType.KAKAO.getValue()))           return SocialLoginType.KAKAO;
+        else if(type.equals(SocialLoginType.GOOGLE.getValue()))     return SocialLoginType.GOOGLE;
+        else if(type.equals(SocialLoginType.APPLE.getValue()))      return SocialLoginType.APPLE;
+        else
+            throw new BizException(AuthResponseType.INVALID_SOCIAL_TYPE);
+    }
+
+    private SocialAuthService getSocialAuthServiceBySocialType(SocialLoginType type){
+        if(type == SocialLoginType.KAKAO)           return kakaoService;
+        else if(type == SocialLoginType.GOOGLE)     return googleService;
+        else if(type == SocialLoginType.APPLE)      return appleService;
         else
             throw new BizException(AuthResponseType.INVALID_SOCIAL_TYPE);
     }

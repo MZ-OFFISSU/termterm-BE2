@@ -1,4 +1,4 @@
-package server.api.termterm.response;
+package server.api.termterm.response.base;
 
 import lombok.Getter;
 

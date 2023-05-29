@@ -11,7 +11,7 @@ import server.api.termterm.domain.report.ReportStatus;
 import server.api.termterm.domain.report.ReportType;
 import server.api.termterm.dto.report.ReportRequestDto;
 import server.api.termterm.repository.ReportRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.report.ReportResponseType;
 
 @Service

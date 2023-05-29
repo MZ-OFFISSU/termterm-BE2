@@ -29,4 +29,7 @@ public interface TermRepository extends JpaRepository<Term, Long> {
 
     @Query("select t from Term t where t.id IN :ids")
     List<Term> findByIds(@Param("ids") List<Long> ids);
+
+    @Query(nativeQuery = true, value = "select * from Term t order by RAND() limit 3")
+    List<Term> findRandomBy();
 }
