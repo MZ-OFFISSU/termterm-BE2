@@ -1,4 +1,4 @@
-package server.api.termterm.response.foo;
+package server.api.termterm.response.inquiry;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,10 +7,10 @@ import server.api.termterm.response.BaseResponseType;
 
 @Getter
 @AllArgsConstructor
-public enum FooResponseType implements BaseResponseType {
-    FOO_CREATE_SUCCESS(20001, "foo 성공", HttpStatus.OK),
+public enum InquiryResponseType implements BaseResponseType {
+    INQUIRY_ACCEPTED(2041, "문의 접수 완료", HttpStatus.OK),
 
-    INVALID_PARAMETER(40001, "parameter 에러", HttpStatus.BAD_REQUEST),
+    INVALID_INQUIRY_TYPE(4044, "문의 유형이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     ;
 
     private final Integer code;
