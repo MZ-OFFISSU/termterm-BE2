@@ -46,6 +46,11 @@ public class InquiryService {
 
     @Transactional
     public void completeInquiry(Long id) {
-        findById(id).complete();
+        findById(id).setStatus(InquiryStatus.COMPLETED);
+    }
+
+    @Transactional
+    public void waitInquiry(Long id) {
+        findById(id).setStatus(InquiryStatus.WAITING);
     }
 }

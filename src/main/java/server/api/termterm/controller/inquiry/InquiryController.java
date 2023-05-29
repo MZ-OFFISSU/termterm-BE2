@@ -55,7 +55,7 @@ public class InquiryController {
             @ApiResponse(code = 2042, message = "문의 답변 처리 완료 (200)"),
             @ApiResponse(code = 4045, message = "문의가 존재하지 않거나 삭제되었습니다. (404)"),
     })
-    @PutMapping("/inquiry/completed/{id}")
+    @PutMapping("/inquiry/to-completed/{id}")
     public ResponseEntity<ResponseMessage<String>> completeInquiry(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
             @Parameter(name = "id", description = "Inquiry Id", in = PATH, required = true) @PathVariable Long id
@@ -67,5 +67,24 @@ public class InquiryController {
         inquiryService.completeInquiry(id);
 
         return new ResponseEntity<>(ResponseMessage.create(InquiryResponseType.INQUIRY_COMPLETED), InquiryResponseType.INQUIRY_COMPLETED.getHttpStatus());
+    }
+
+    @ApiOperation(value = "문의사항 대기 중 변환", notes = "문의사항 대기 중 변환")
+    @ApiResponses({
+            @ApiResponse(code = 2043, message = "문의 대기 중 변환 완료 (200)"),
+            @ApiResponse(code = 4045, message = "문의가 존재하지 않거나 삭제되었습니다. (404)"),
+    })
+    @PutMapping("/inquiry/to-waiting/{id}")
+    public ResponseEntity<ResponseMessage<String>> waitInquiry(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "id", description = "Inquiry Id", in = PATH, required = true) @PathVariable Long id
+    ){
+        Member member = memberService.getMemberByToken(token);
+        if (!memberService.checkAdmin(member))
+            throw new BizException(MemberResponseType.NO_AUTHORIZATION);
+
+        inquiryService.waitInquiry(id);
+
+        return new ResponseEntity<>(ResponseMessage.create(InquiryResponseType.INQUIRY_HOLD), InquiryResponseType.INQUIRY_HOLD.getHttpStatus());
     }
 }
