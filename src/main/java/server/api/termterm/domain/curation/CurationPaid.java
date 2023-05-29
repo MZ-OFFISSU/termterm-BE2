@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CurationPaid extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +25,4 @@ public class CurationPaid extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "CURATION_ID")
     private Curation curation;
-
-    @Builder
-    public CurationPaid(Member member, Curation curation){
-        this.member = member;
-        this.curation = curation;
-    }
 }

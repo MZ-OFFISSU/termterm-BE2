@@ -33,6 +33,7 @@ public class CurationService {
     private final CategoryRepository categoryRepository;
     private final CurationBookmarkRepository curationBookmarkRepository;
     private final TermBookmarkRepository termBookmarkRepository;
+    private final CurationPaidRepository curationPaidRepository;
 
 
     @Transactional(readOnly = true)
@@ -168,5 +169,10 @@ public class CurationService {
     @Transactional(readOnly = true)
     public Set<CurationSimpleInfoDto> getBookmarkedCurations(Member member) {
         return curationRepository.getCurationSimpleInfoDtoByMemberBookmarked(member, BookmarkStatus.YES);
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean getWhetherMemberPaidForCuration(Member member, Curation curation) {
+        return curationPaidRepository.findByMemberAndCuration(member, curation).isPresent();
     }
 }
