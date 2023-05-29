@@ -11,15 +11,17 @@ import org.springframework.web.bind.annotation.*;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
+import server.api.termterm.dto.term.TermSimpleDto;
 import server.api.termterm.response.base.ApiResponse;
 import server.api.termterm.response.term.TermResponseType;
+import server.api.termterm.service.category.CategoryService;
 import server.api.termterm.service.member.MemberService;
 import server.api.termterm.service.term.TermService;
 
+import java.util.Collection;
 import java.util.List;
 
-import static io.swagger.v3.oas.annotations.enums.ParameterIn.HEADER;
-import static io.swagger.v3.oas.annotations.enums.ParameterIn.PATH;
+import static io.swagger.v3.oas.annotations.enums.ParameterIn.*;
 
 @Api(tags = "Term")
 @RestController
@@ -29,6 +31,7 @@ import static io.swagger.v3.oas.annotations.enums.ParameterIn.PATH;
 public class TermController {
     private final MemberService memberService;
     private final TermService termService;
+    private final CategoryService categoryService;
 
     @ApiOperation(value = "용어 검색", notes = "용어 검색\n 북마크 되어 있으면 YES, 안 되어 있으면 null")
     @ApiResponses({
@@ -75,4 +78,21 @@ public class TermController {
     }
 
 
+    @ApiOperation(value = "전체 용어 리스트", notes = "전체 용어 리스트, 카테고리별.\n 페이지네이션 처리\n category가 없을 경우 추천 단어 리스트")
+    @ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 2054, message = "용어 리스트 응답 성공"),
+    })
+    @GetMapping("/term/list")
+    public ApiResponse<Collection<TermSimpleDto>> getTermList(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
+            @Parameter(name = "category", description = "String : X / pm / marketing / development / design / business / IT", in = QUERY) @RequestParam(value = "category", required = false) String categoryName
+    ){
+        Member member = memberService.getMemberByToken(token);
+
+        if (categoryName == null){
+            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getRecommendedTerms(member));
+        }else {
+            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getTermListByCategory(member, categoryService.findByName(categoryName)));
+        }
+    }
 }

@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum BookmarkStatus {
-    YES("Y"),
-    NO("N"),
+    YES("YES"),
+    NO("NO"),
     ;
 
     private final String status;

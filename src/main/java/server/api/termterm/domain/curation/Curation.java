@@ -9,7 +9,6 @@ import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.term.Term;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,7 +28,7 @@ public class Curation {
     private String thumbnail;
 
     @OneToMany(mappedBy = "curation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CurationBookmark> curationBookmarks = new ArrayList<>();
+    private List<CurationBookmark> curationBookmarks;
 
     @ManyToMany
     @JoinTable(name = "CURATION_TAG",
