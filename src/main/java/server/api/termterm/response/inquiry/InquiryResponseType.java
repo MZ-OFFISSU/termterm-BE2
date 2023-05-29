@@ -3,7 +3,7 @@ package server.api.termterm.response.inquiry;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import server.api.termterm.response.BaseResponseType;
+import server.api.termterm.response.base.BaseResponseType;
 
 @Getter
 @AllArgsConstructor

@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import server.api.termterm.dto.inquiry.InquiryRequestDto;
-import server.api.termterm.response.BizException;
-import server.api.termterm.response.InternalServerExceptionType;
+import server.api.termterm.response.base.BizException;
+import server.api.termterm.response.base.InternalServerExceptionType;
 
 import javax.mail.internet.MimeMessage;
 import java.io.InputStream;

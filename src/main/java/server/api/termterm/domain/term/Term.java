@@ -8,7 +8,6 @@ import server.api.termterm.domain.comment.Comment;
 import server.api.termterm.domain.curation.Curation;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,15 +29,15 @@ public class Term {
     @JoinTable(name = "TERM_CATEGORY",
             joinColumns = @JoinColumn(name = "TERM_ID"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_ID"))
-    private List<Category> categories = new ArrayList<>();
+    private List<Category> categories;
 
     @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
+    private List<Comment> comments;
 
     @ManyToMany(mappedBy = "terms")
     private List<Curation> curations;
 
     @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TermBookmark> termBookmarks = new ArrayList<>();
+    private List<TermBookmark> termBookmarks;
 
 }

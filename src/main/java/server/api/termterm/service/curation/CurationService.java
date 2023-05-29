@@ -15,9 +15,10 @@ import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.curation.CurationDetailDto;
 import server.api.termterm.dto.curation.CurationRegisterRequestDto;
 import server.api.termterm.dto.curation.CurationSimpleInfoDto;
+import server.api.termterm.dto.curation.CurationSimpleInfoDtoInterface;
 import server.api.termterm.dto.term.TermSimpleDto;
 import server.api.termterm.repository.*;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.curation.CurationResponseType;
 
 import java.util.*;
@@ -116,8 +117,8 @@ public class CurationService {
     }
 
     // 함께 보면 더 좋은 용어 모음집
-    private List<CurationSimpleInfoDto> getCurationSimpleInfoDtos(Member member, Category category){
-        List<CurationSimpleInfoDto> ret = curationRepository.getCurationSimpleInfoDtoByCategory(member.getId(), category.getId());
+    private List<CurationSimpleInfoDtoInterface> getCurationSimpleInfoDtos(Member member, Category category){
+        List<CurationSimpleInfoDtoInterface> ret = curationRepository.getCurationSimpleInfoDtoByCategory(member.getId(), category.getId());
         Collections.shuffle(ret);
 
         return ret;
@@ -136,12 +137,12 @@ public class CurationService {
     @Transactional(readOnly = true)
     public CurationDetailDto getCurationDetail(Member member, Curation curation, Boolean memberPaid) {
         List<TermSimpleDto> termSimpleDtos = getTermSimpleDtos(member, curation.getTerms());
-        List<CurationSimpleInfoDto> curationSimpleInfoDtos = getCurationSimpleInfoDtos(member, getRandomCategory(curation.getCategories()));
+        List<CurationSimpleInfoDtoInterface> curationSimpleInfoDtoInterfaces = getCurationSimpleInfoDtos(member, getRandomCategory(curation.getCategories()));
         List<String> tagStrings = getTagStrings(curation.getTags());
 
         return CurationDetailDto.builder()
                 .paid(memberPaid)
-                .curationSimpleInfos(curationSimpleInfoDtos)
+                .curationSimpleInfos(curationSimpleInfoDtoInterfaces)
                 .termSimples(termSimpleDtos)
                 .tags(tagStrings)
                 .build();
@@ -153,14 +154,19 @@ public class CurationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CurationSimpleInfoDto> getRecommendedCurations(Member member) {
+    public List<CurationSimpleInfoDtoInterface> getRecommendedCurations(Member member) {
         return getCurationSimpleInfoDtos(member, getRandomCategory(member.getCategories()));
     }
 
 
     @Transactional(readOnly = true)
-    public List<CurationSimpleInfoDto> getCurationsByCategory(Member member, String categoryName) {
+    public List<CurationSimpleInfoDtoInterface> getCurationsByCategory(Member member, String categoryName) {
         Category category = categoryRepository.findByNameIgnoreCase(categoryName);
         return getCurationSimpleInfoDtos(member, category);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<CurationSimpleInfoDto> getBookmarkedCurations(Member member) {
+        return curationRepository.getCurationSimpleInfoDtoByMemberBookmarked(member, BookmarkStatus.YES);
     }
 }

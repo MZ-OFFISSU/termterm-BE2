@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import server.api.termterm.controller.auth.SocialLoginType;
 import server.api.termterm.domain.bookmark.CurationBookmark;
 import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
@@ -56,19 +55,19 @@ public class Member {
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "member")
-    private List<CommentLike> commentLikes = new ArrayList<>();
+    private List<CommentLike> commentLikes;
 
     @OneToMany(mappedBy = "member")
-    private List<Report> reports = new ArrayList<>();
+    private List<Report> reports;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CurationBookmark> curationBookmarks = new ArrayList<>();
+    private List<CurationBookmark> curationBookmarks;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TermBookmark> termBookmarks = new ArrayList<>();
+    private List<TermBookmark> termBookmarks;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CurationPaid> curationPaids = new ArrayList<>();
+    private List<CurationPaid> curationPaids;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Builder.Default
@@ -105,16 +104,12 @@ public class Member {
         return this;
     }
 
-    public Member updateProfileImg(String profileImg){
+    public void updateProfileImg(String profileImg){
         this.profileImg = profileImg;
-
-        return this;
     }
 
-    public Member updateCategories(List<Category> categories){
+    public void updateCategories(List<Category> categories){
         this.categories = categories;
-
-        return this;
     }
 
 }

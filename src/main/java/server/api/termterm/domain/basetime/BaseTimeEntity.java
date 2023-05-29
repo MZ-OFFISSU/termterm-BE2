@@ -1,4 +1,4 @@
-package server.api.termterm.domain;
+package server.api.termterm.domain.basetime;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;

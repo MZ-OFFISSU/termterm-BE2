@@ -14,7 +14,7 @@ import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
 import server.api.termterm.repository.TermBookmarkRepository;
 import server.api.termterm.repository.TermRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.term.TermResponseType;
 
 import java.util.ArrayList;

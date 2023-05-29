@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import server.api.termterm.dto.inquiry.InquiryRequestDto;
-import server.api.termterm.response.ResponseMessage;
+import server.api.termterm.response.base.ApiResponse;
 import server.api.termterm.service.inquiry.MailService;
 
 @Aspect
@@ -21,7 +21,7 @@ public class MailAspect {
             pointcut = "execution(* server.api.termterm.controller.inquiry.InquiryController.registerInquiry(server.api.termterm.dto.inquiry.InquiryRequestDto))",
             returning = "returned"
     )
-    public void afterReturnRegisterInquiry(ResponseEntity<ResponseMessage<InquiryRequestDto>> returned){
+    public void afterReturnRegisterInquiry(ResponseEntity<ApiResponse<InquiryRequestDto>> returned){
         InquiryRequestDto inquiryRequestDto = returned.getBody().getData();
         mailService.sendAcceptMail(inquiryRequestDto);
     }

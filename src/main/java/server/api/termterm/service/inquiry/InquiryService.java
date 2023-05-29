@@ -10,7 +10,7 @@ import server.api.termterm.domain.inquiry.InquiryStatus;
 import server.api.termterm.domain.inquiry.InquiryType;
 import server.api.termterm.dto.inquiry.InquiryRequestDto;
 import server.api.termterm.repository.InquiryRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.inquiry.InquiryResponseType;
 
 @Service

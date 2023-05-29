@@ -1,7 +1,7 @@
 package server.api.termterm.domain.curation;
 
 import lombok.*;
-import server.api.termterm.domain.BaseTimeEntity;
+import server.api.termterm.domain.basetime.BaseTimeEntity;
 import server.api.termterm.domain.member.Member;
 
 import javax.persistence.*;

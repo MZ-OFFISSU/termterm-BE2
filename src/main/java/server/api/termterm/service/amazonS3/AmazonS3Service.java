@@ -9,10 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.api.termterm.domain.member.Member;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.amazonS3.AmazonS3ResponseType;
 
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
 

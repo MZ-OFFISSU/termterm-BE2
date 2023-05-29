@@ -17,7 +17,7 @@ import server.api.termterm.jwt.JwtProvider;
 import server.api.termterm.repository.CategoryRepository;
 import server.api.termterm.repository.MemberRepository;
 import server.api.termterm.repository.TokenRepository;
-import server.api.termterm.response.BizException;
+import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.category.CategoryResponseType;
 import server.api.termterm.response.jwt.JwtResponseType;
 import server.api.termterm.response.member.MemberResponseType;
