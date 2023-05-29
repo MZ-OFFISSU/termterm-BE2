@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.curation.Curation;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.curation.CurationDetailDto;
@@ -18,6 +19,7 @@ import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.base.ApiResponse;
 import server.api.termterm.response.curation.CurationResponseType;
 import server.api.termterm.response.member.MemberResponseType;
+import server.api.termterm.service.category.CategoryService;
 import server.api.termterm.service.curation.CurationService;
 import server.api.termterm.service.member.MemberService;
 
@@ -34,6 +36,7 @@ import static io.swagger.v3.oas.annotations.enums.ParameterIn.*;
 public class CurationController {
     private final MemberService memberService;
     private final CurationService curationService;
+    private final CategoryService categoryService;
 
     @ApiOperation(value = "큐레이션 등록", notes = "큐레이션 등록")
     @ApiResponses({
@@ -102,8 +105,7 @@ public class CurationController {
         Curation curation = curationService.findById(id);
 
         // 유저 paid 여부 확인
-//        Boolean memberPaid = curationService.getWhetherMemberPaidForCuration(member, curation);
-        Boolean memberPaid = false;
+        Boolean memberPaid = curationService.getWhetherMemberPaidForCuration(member, curation);
 
         CurationDetailDto curationDetailDto = curationService.getCurationDetail(member, curation, memberPaid);
 
@@ -121,9 +123,10 @@ public class CurationController {
             @Parameter(name = "category", description = "String : X / pm / marketing / development / design / business / IT", in = QUERY) @RequestParam(value = "category", required = false) String categoryName
     ){
         Member member = memberService.getMemberByToken(token);
+        Category category = categoryService.findByName(categoryName);
 
         List<CurationSimpleInfoDtoInterface> curationSimpleInfoDtoInterfaces =
-                (categoryName == null) ?  curationService.getRecommendedCurations(member) : curationService.getCurationsByCategory(member, categoryName);
+                (categoryName == null) ?  curationService.getRecommendedCurations(member) : curationService.getCurationsByCategory(member, category);
 
         return ApiResponse.of(CurationResponseType.CURATION_LIST_RETURN_SUCCESS, curationSimpleInfoDtoInterfaces);
     }
