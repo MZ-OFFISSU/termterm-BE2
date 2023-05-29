@@ -47,7 +47,7 @@ public class Comment extends BaseTimeEntity {
     private List<Report> reports;
 
     @PrePersist
-    public void setLikeCnt(){
+    public void initLikeCnt(){
         this.likeCnt = 0;
     }
 
