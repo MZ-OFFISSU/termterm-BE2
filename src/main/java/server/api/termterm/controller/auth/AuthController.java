@@ -54,11 +54,12 @@ public class AuthController {
             throw new BizException(AuthResponseType.NO_AUTHORIZATION_CODE);
         }
 
-        SocialAuthService socialAuthService = getSocialAuthServiceBySocialType(socialType);
+        SocialLoginType type = getSocialType(socialType);
+        SocialAuthService socialAuthService = getSocialAuthServiceBySocialType(type);
         TokenDto socialToken = socialAuthService.getToken(authorizationCode);
         BaseMemberInfoDto memberInfoDto = socialAuthService.getMemberInfo(socialToken);
 
-        Member member = memberService.getIsMember(memberInfoDto) ? memberService.getMember(memberInfoDto) : memberService.signup(memberInfoDto);
+        Member member = memberService.getIsMember(memberInfoDto) ? memberService.getMember(memberInfoDto) : memberService.signup(memberInfoDto, type);
         TokenDto serviceToken = memberService.issueToken(member);
 
         return ApiResponse.of(AuthResponseType.LOGIN_SUCCESS, serviceToken);
@@ -77,10 +78,18 @@ public class AuthController {
         return ApiResponse.of(JwtResponseType.TOKEN_REISSUED, tokenDto);
     }
 
-    private SocialAuthService getSocialAuthServiceBySocialType(String type){
-        if(type.equals(SocialLoginType.KAKAO.getValue()))           return kakaoService;
-        else if(type.equals(SocialLoginType.GOOGLE.getValue()))     return googleService;
-        else if(type.equals(SocialLoginType.APPLE.getValue()))      return appleService;
+    private SocialLoginType getSocialType(String type){
+        if(type.equals(SocialLoginType.KAKAO.getValue()))           return SocialLoginType.KAKAO;
+        else if(type.equals(SocialLoginType.GOOGLE.getValue()))     return SocialLoginType.GOOGLE;
+        else if(type.equals(SocialLoginType.APPLE.getValue()))      return SocialLoginType.APPLE;
+        else
+            throw new BizException(AuthResponseType.INVALID_SOCIAL_TYPE);
+    }
+
+    private SocialAuthService getSocialAuthServiceBySocialType(SocialLoginType type){
+        if(type == SocialLoginType.KAKAO)           return kakaoService;
+        else if(type == SocialLoginType.GOOGLE)     return googleService;
+        else if(type == SocialLoginType.APPLE)      return appleService;
         else
             throw new BizException(AuthResponseType.INVALID_SOCIAL_TYPE);
     }

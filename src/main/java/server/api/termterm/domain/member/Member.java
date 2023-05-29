@@ -41,6 +41,8 @@ public class Member {
     private Integer yearCareer;
     private String domain;
     private Integer point;
+
+    @Enumerated(EnumType.STRING)
     private SocialLoginType socialType;
     private String identifier;
     private String refreshToken;
@@ -94,14 +96,12 @@ public class Member {
         this.identifier = null;
     }
 
-    public Member updateInfo(MemberInfoUpdateRequestDto memberInfoUpdateRequestDto){
+    public void updateInfo(MemberInfoUpdateRequestDto memberInfoUpdateRequestDto){
         this.nickname = memberInfoUpdateRequestDto.getNickname();
         this.domain = memberInfoUpdateRequestDto.getDomain();
         this.job = memberInfoUpdateRequestDto.getJob();
         this.yearCareer = memberInfoUpdateRequestDto.getYearCareer();
         this.introduction = memberInfoUpdateRequestDto.getIntroduction();
-
-        return this;
     }
 
     public void updateProfileImg(String profileImg){
@@ -110,6 +110,20 @@ public class Member {
 
     public void updateCategories(List<Category> categories){
         this.categories = categories;
+    }
+
+
+    @PrePersist
+    public void initLikeCnt(){
+        this.point = 0;
+    }
+
+    public void addPoint(Integer point){
+        this.point += point;
+    }
+
+    public void subPoint(Integer point){
+        this.point -= point;
     }
 
 }

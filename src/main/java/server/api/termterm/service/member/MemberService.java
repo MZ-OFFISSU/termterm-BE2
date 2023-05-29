@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import server.api.termterm.domain.jwt.Token;
 import server.api.termterm.domain.member.Authority;
 import server.api.termterm.domain.member.Member;
+import server.api.termterm.domain.member.SocialLoginType;
 import server.api.termterm.dto.jwt.TokenDto;
 import server.api.termterm.dto.member.BaseMemberInfoDto;
 import server.api.termterm.dto.member.MemberCategoriesUpdateRequestDto;
@@ -49,14 +50,15 @@ public class MemberService {
     }
 
     @Transactional
-    public Member signup(BaseMemberInfoDto memberInfoDto) {
+    public Member signup(BaseMemberInfoDto memberInfoDto, SocialLoginType type) {
         Member memberEntity = Member.builder()
                 .socialId(memberInfoDto.getSocialId())
                 .name(memberInfoDto.getName())
                 .email(memberInfoDto.getEmail())
-                .nickname(memberInfoDto.getNickname())
+                .nickname(UUID.randomUUID().toString())
                 .profileImg(memberInfoDto.getProfileImg())
                 .identifier(UUID.randomUUID().toString())
+                .socialType(type)
                 .build();
 
         memberEntity.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));
