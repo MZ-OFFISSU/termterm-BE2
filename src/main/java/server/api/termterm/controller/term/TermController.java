@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.dto.term.TermDto;
@@ -18,7 +20,6 @@ import server.api.termterm.service.category.CategoryService;
 import server.api.termterm.service.member.MemberService;
 import server.api.termterm.service.term.TermService;
 
-import java.util.Collection;
 import java.util.List;
 
 import static io.swagger.v3.oas.annotations.enums.ParameterIn.*;
@@ -42,7 +43,7 @@ public class TermController {
     public ApiResponse<List<TermMinimumDto>> searchTerm(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
             @PathVariable(value = "name") String name
-    ){
+    ) {
         Member member = memberService.getMemberByToken(token);
         List<TermMinimumDto> termMinimumDtos = termService.searchTerm(member, name);
 
@@ -58,7 +59,7 @@ public class TermController {
     public ApiResponse<TermDto> getTermDetail(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
             @PathVariable(value = "id") Long id
-    ){
+    ) {
         Member member = memberService.getMemberByToken(token);
         TermDto termDto = termService.getTermDetail(member, id);
 
@@ -70,7 +71,7 @@ public class TermController {
     public ApiResponse<String> bookmarkTerm(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
             @Parameter(name = "id", description = "term id", in = PATH, required = true) @PathVariable(value = "id") Long id
-    ){
+    ) {
         Member member = memberService.getMemberByToken(token);
         termService.bookmarkTerm(member, id);
 
@@ -83,16 +84,17 @@ public class TermController {
             @io.swagger.annotations.ApiResponse(code = 2054, message = "용어 리스트 응답 성공"),
     })
     @GetMapping("/term/list")
-    public ApiResponse<Collection<TermSimpleDto>> getTermList(
+    public ApiResponse<Page<TermSimpleDto>> getTermList(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
-            @Parameter(name = "category", description = "String : X / pm / marketing / development / design / business / IT", in = QUERY) @RequestParam(value = "category", required = false) String categoryName
-    ){
+            @Parameter(name = "category", description = "String : X / pm / marketing / development / design / business / IT", in = QUERY) @RequestParam(value = "category", required = false) String categoryName,
+            Pageable pageable
+    ) {
         Member member = memberService.getMemberByToken(token);
 
-        if (categoryName == null){
-            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getRecommendedTerms(member));
-        }else {
-            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getTermListByCategory(member, categoryService.findByName(categoryName)));
+        if (categoryName == null) {
+            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getRecommendedTerms(member, pageable));
+        } else {
+            return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getTermListByCategory(member, categoryService.findByName(categoryName), pageable));
         }
     }
 }
