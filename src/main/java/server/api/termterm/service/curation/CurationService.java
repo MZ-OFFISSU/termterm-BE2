@@ -101,6 +101,7 @@ public class CurationService {
 
     private List<TermSimpleDto> getTermSimpleDtos(Member member, List<Term> terms){
         List<TermSimpleDto> termSimpleDtos = new ArrayList<>();
+
         for(Term term : terms){
             TermBookmark termBookmark = termBookmarkRepository.findByMemberAndTerm(member, term);
 

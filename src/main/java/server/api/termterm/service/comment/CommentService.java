@@ -38,22 +38,19 @@ public class CommentService {
 
     @Transactional
     public void registerComment(Member member, CommentRegisterRequestDto commentRegisterRequestDto, Term term) {
-        Comment comment = Comment.builder()
+        commentRepository.save(Comment.builder()
                 .term(term)
                 .member(member)
                 .content(commentRegisterRequestDto.getContent())
                 .source(commentRegisterRequestDto.getSource())
                 .status(CommentStatus.WAITING)
-                .build();
-
-        commentRepository.save(comment);
+                .build());
     }
 
     @Transactional
     public void saveNewCommentLike(Member member, Comment comment){
-        CommentLike commentLike = new CommentLike(member, comment, CommentLikeStatus.YES);
+        commentLikeRepository.save(new CommentLike(member, comment, CommentLikeStatus.YES));
         comment.addLike();
-        commentLikeRepository.save(commentLike);
     }
 
     @Transactional
@@ -61,10 +58,8 @@ public class CommentService {
         Comment comment = findById(id);
         CommentLike commentLike = findByMemberAndComment(member, comment);
 
-        boolean existsCommentLike = commentLike != null;
-
         // 사용자가 해당 커멘트에 좋아요를 누른 이력이 없을 때
-        if(!existsCommentLike){
+        if(commentLike == null){
             saveNewCommentLike(member, comment);
             return;
         }
@@ -84,10 +79,8 @@ public class CommentService {
         Comment comment = findById(id);
         CommentLike commentLike = findByMemberAndComment(member, comment);
 
-        boolean existsCommentLike = commentLike != null;
-
         // 사용자가 해당 커멘트에 좋아요를 누른 이력이 없거나 좋아요 취소 상태일 때
-        if(!existsCommentLike || commentLike.getStatus() == CommentLikeStatus.NO){
+        if(commentLike == null || commentLike.getStatus() == CommentLikeStatus.NO){
             throw new BizException(CommentResponseType.DID_NOT_LIKED);
         }
 
@@ -97,7 +90,6 @@ public class CommentService {
 
     @Transactional
     public void acceptComment(Long id) {
-        Comment comment = findById(id);
-        comment.accept();
+        this.findById(id).accept();
     }
 }
