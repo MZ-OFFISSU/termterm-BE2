@@ -2,8 +2,12 @@ package server.api.termterm.service.term;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import server.api.termterm.domain.bookmark.BookmarkStatus;
 import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.comment.Comment;
@@ -12,13 +16,17 @@ import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.comment.CommentDto;
 import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
+import server.api.termterm.dto.term.TermSimpleDto;
+import server.api.termterm.dto.term.TermSimpleDtoInterface;
 import server.api.termterm.repository.TermBookmarkRepository;
 import server.api.termterm.repository.TermRepository;
 import server.api.termterm.response.base.BizException;
 import server.api.termterm.response.term.TermResponseType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.sql.Clob;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,14 +54,10 @@ public class TermService {
 
     @Transactional
     public void bookmarkTerm(Member member, Long id) {
-        Term term = findById(id);
-
-        TermBookmark termBookmark = TermBookmark.builder()
+        termBookmarkRepository.save(TermBookmark.builder()
                 .member(member)
-                .term(term)
-                .build();
-
-        termBookmarkRepository.save(termBookmark);
+                .term(findById(id))
+                .build());
     }
 
     private List<String> getCategoryString(List<Category> categories){
@@ -70,7 +74,7 @@ public class TermService {
         List<CommentDto> commentDtos = new ArrayList<>();
 
         for(Comment comment : comments){
-            CommentDto commentDto = CommentDto.builder()
+            commentDtos.add(CommentDto.builder()
                     .id(comment.getId())
                     .content(comment.getContent())
                     .likeCnt(comment.getLikeCnt())
@@ -78,9 +82,7 @@ public class TermService {
                     .authorJob(comment.getMember().getJob())
                     .authorProfileImageUrl(comment.getMember().getProfileImg())
                     .createdDate(comment.getCreatedDate().toString())
-                    .build();
-
-            commentDtos.add(commentDto);
+                    .build());
         }
 
         return commentDtos;
@@ -92,12 +94,63 @@ public class TermService {
         TermDto termDto = termRepository.getTermDetail(member, id);
         Term term = termDto.getTerm();
 
-        List<String> categories = getCategoryString(term.getCategories());
-        termDto.setCategories(categories);
-
-        List<CommentDto> commentDtos = getCommentDtos(term.getComments());
-        termDto.setComments(commentDtos);
+        termDto.setCategories(getCategoryString(term.getCategories()));
+        termDto.setComments(getCommentDtos(term.getComments()));
 
         return termDto;
     }
+
+    @Transactional(readOnly = true)
+    public Page<TermSimpleDto> getRecommendedTerms(Member member, Pageable pageable) {
+        List<TermSimpleDto> lists = new ArrayList<>();
+
+        for (Category category : member.getCategories()){
+            lists.addAll(convertCollectionTermSimpleDto(termRepository.getTermsByCategory(member.getId(), category.getId())));
+        }
+
+        return getPageImplByList(new ArrayList<>(lists.stream().distinct().collect(Collectors.toList())), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TermSimpleDto> getTermListByCategory(Member member, Category category, Pageable pageable) {
+        return getPageImplByList(convertCollectionTermSimpleDto(termRepository.getTermsByCategory(member.getId(), category.getId())), pageable);
+    }
+
+    private List<TermSimpleDto> convertCollectionTermSimpleDto(List<TermSimpleDtoInterface> list){
+        List<TermSimpleDto> l = new ArrayList<>();
+
+        for(TermSimpleDtoInterface t : list){
+            l.add(TermSimpleDto.builder()
+                    .id(t.getTermId())
+                    .name(t.getName())
+                    .description(clobToString(t.getDescription()))
+                    .bookmarked((t.getBookmarked() == null) ? BookmarkStatus.NO : BookmarkStatus.valueOf(t.getBookmarked()))
+                    .build());
+        }
+
+        return l;
+    }
+
+    private PageImpl<TermSimpleDto> getPageImplByList(List<TermSimpleDto> lists, Pageable pageable){
+        final int start = (int) pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), lists.size());
+
+        return new PageImpl<>(lists.subList(start, end), pageable, lists.size());
+    }
+
+    private String clobToString(Clob clob) {
+        try {
+            StringBuilder s = new StringBuilder();
+            BufferedReader br = new BufferedReader(clob.getCharacterStream());
+            String ts;
+            while ((ts = br.readLine()) != null) {
+                s.append(ts).append("\n");
+            }
+            br.close();
+            return s.toString().replace("\n", "");
+        }catch (Exception e){
+            return null;
+        }
+    }
+
 }

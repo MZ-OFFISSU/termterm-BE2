@@ -30,17 +30,13 @@ public class ReportService {
 
     @Transactional
     public void registerReport(Member member, Comment comment, ReportRequestDto reportRequestDto) {
-        ReportType reportType = getReportType(reportRequestDto.getType());
-
-        Report report =  Report.builder()
-                .type(reportType)
+        reportRepository.save(Report.builder()
+                .type(getReportType(reportRequestDto.getType()))
                 .content(reportRequestDto.getContent())
                 .status(ReportStatus.WAITING)
                 .member(member)
                 .comment(comment)
-                .build();
-
-        reportRepository.save(report);
+                .build());
     }
 
     @Transactional

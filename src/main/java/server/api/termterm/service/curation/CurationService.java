@@ -101,6 +101,7 @@ public class CurationService {
 
     private List<TermSimpleDto> getTermSimpleDtos(Member member, List<Term> terms){
         List<TermSimpleDto> termSimpleDtos = new ArrayList<>();
+
         for(Term term : terms){
             TermBookmark termBookmark = termBookmarkRepository.findByMemberAndTerm(member, term);
 
@@ -161,8 +162,7 @@ public class CurationService {
 
 
     @Transactional(readOnly = true)
-    public List<CurationSimpleInfoDtoInterface> getCurationsByCategory(Member member, String categoryName) {
-        Category category = categoryRepository.findByNameIgnoreCase(categoryName);
+    public List<CurationSimpleInfoDtoInterface> getCurationsByCategory(Member member, Category category) {
         return getCurationSimpleInfoDtos(member, category);
     }
 

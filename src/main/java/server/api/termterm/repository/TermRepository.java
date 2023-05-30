@@ -8,6 +8,7 @@ import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
+import server.api.termterm.dto.term.TermSimpleDtoInterface;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,4 +33,14 @@ public interface TermRepository extends JpaRepository<Term, Long> {
 
     @Query(nativeQuery = true, value = "select * from Term t order by RAND() limit 3")
     List<Term> findRandomBy();
+
+    @Query(nativeQuery = true,
+            value = "select t.term_id as termId, t.name, t.description, tb.status as bookmarked " +
+                    "from term t " +
+                    "inner join term_category tc " +
+                    "on t.term_id = tc.term_id " +
+                    "left join term_bookmark tb " +
+                    "on tb.member_id = :memberId and tb.term_id = t.term_id " +
+                    "where tc.category_id = :categoryId")
+    List<TermSimpleDtoInterface> getTermsByCategory(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
 }

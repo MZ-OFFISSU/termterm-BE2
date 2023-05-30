@@ -34,14 +34,12 @@ public class InquiryService {
     }
     @Transactional
     public void registerInquiry(InquiryRequestDto inquiryRequestDto) {
-        Inquiry inquiry = Inquiry.builder()
+        inquiryRepository.save(Inquiry.builder()
                 .email(inquiryRequestDto.getEmail())
                 .content(inquiryRequestDto.getContent())
                 .status(InquiryStatus.WAITING)
                 .type(getInquiryTypeByName(inquiryRequestDto.getType()))
-                .build();
-
-        inquiryRepository.save(inquiry);
+                .build());
     }
 
     @Transactional

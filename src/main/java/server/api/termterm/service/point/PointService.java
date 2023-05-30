@@ -27,12 +27,10 @@ public class PointService {
         if (!isAffordCuration(member))
             throw new BizException(PointResponseType.NOT_ENOUGH_POINT);
 
-        CurationPaid curationPaid = CurationPaid.builder()
+        curationPaidRepository.save(CurationPaid.builder()
                 .member(member)
                 .curation(curation)
-                .build();
-
-        curationPaidRepository.save(curationPaid);
+                .build());
         member.subPoint(CURATION_POINT);
 
         log.info("큐레이션 구매 - curationId : {}, memberId : {}", curation.getId(), member.getId());
