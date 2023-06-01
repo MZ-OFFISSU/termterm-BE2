@@ -153,4 +153,13 @@ public class TermService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<TermSimpleDto> getDailyTerms(Member member) {
+        List<Long> categoryIds = new ArrayList<>();
+        for (Category category : member.getCategories()) {
+            categoryIds.add(category.getId());
+        }
+
+        return convertCollectionTermSimpleDto(termRepository.getTermsByCategoriesOnly4(member.getId(), categoryIds));
+    }
 }

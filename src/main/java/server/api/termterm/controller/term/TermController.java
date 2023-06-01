@@ -97,4 +97,18 @@ public class TermController {
             return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getTermListByCategory(member, categoryService.findByName(categoryName), pageable));
         }
     }
+
+    @ApiOperation(value = "오늘의 용어", notes = "오늘의 용어 4개 리턴 - 사용자의 관심사 기반으로")
+    @ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 2055, message = "오늘의 용어 응답 성공"),
+    })
+    @GetMapping("/term/daily")
+    public ApiResponse<Object> getDailyTerms(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        List<TermSimpleDto> dailyTermList = termService.getDailyTerms(member);
+
+        return ApiResponse.of(TermResponseType.DAILY_SUCCESS, dailyTermList);
+    }
 }
