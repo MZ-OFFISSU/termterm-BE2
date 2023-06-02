@@ -66,7 +66,7 @@ public class TermController {
         return ApiResponse.of(TermResponseType.DETAIL_SUCCESS, termDto);
     }
 
-    @ApiOperation(value = "용어 북마크", notes = "용어 북마크")
+    @ApiOperation(value = "용어 북마크 (임시)", notes = "용어 북마크. 임시용입니다. 폴더 기능이 완성되면 폴더 관련 로직과 함께 수정해야 합니다. ")
     @GetMapping("/term/bookmark/{id}")
     public ApiResponse<String> bookmarkTerm(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token,
@@ -79,7 +79,7 @@ public class TermController {
     }
 
 
-    @ApiOperation(value = "전체 용어 리스트", notes = "전체 용어 리스트, 카테고리별.\n 페이지네이션 처리\n category가 없을 경우 추천 단어 리스트")
+    @ApiOperation(value = "전체 용어 리스트", notes = "전체 용어 리스트, 카테고리별.\n 페이지네이션 처리\n category가 없을 경우 추천 단어 리스트\n page: 몇 페이지인지\nsize: 한 페이지 당 불러온 단어 개수")
     @ApiResponses({
             @io.swagger.annotations.ApiResponse(code = 2054, message = "용어 리스트 응답 성공"),
     })
@@ -96,5 +96,19 @@ public class TermController {
         } else {
             return ApiResponse.of(TermResponseType.LIST_SUCCESS, termService.getTermListByCategory(member, categoryService.findByName(categoryName), pageable));
         }
+    }
+
+    @ApiOperation(value = "오늘의 용어", notes = "오늘의 용어 4개 리턴 - 사용자의 관심사 기반으로")
+    @ApiResponses({
+            @io.swagger.annotations.ApiResponse(code = 2055, message = "오늘의 용어 응답 성공"),
+    })
+    @GetMapping("/term/daily")
+    public ApiResponse<List<TermSimpleDto>> getDailyTerms(
+            @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token
+    ){
+        Member member = memberService.getMemberByToken(token);
+        List<TermSimpleDto> dailyTerms = termService.getDailyTerms(member);
+
+        return ApiResponse.of(TermResponseType.DAILY_SUCCESS, dailyTerms);
     }
 }

@@ -1,5 +1,6 @@
 package server.api.termterm.domain.bookmark;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TermBookmark {
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -28,14 +31,8 @@ public class TermBookmark {
     private Term term;
 
     @Enumerated(EnumType.STRING)
-    private BookmarkStatus status;
-
-    @Builder
-    public TermBookmark(Member member, Term term){
-        this.member = member;
-        this.term = term;
-        this.status = BookmarkStatus.YES;
-    }
+    @Builder.Default
+    private BookmarkStatus status = BookmarkStatus.YES;
 
     public void unbookmark(){
         this.status = BookmarkStatus.NO;

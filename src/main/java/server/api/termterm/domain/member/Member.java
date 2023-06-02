@@ -11,6 +11,7 @@ import server.api.termterm.domain.comment.Comment;
 import server.api.termterm.domain.comment.CommentLike;
 import server.api.termterm.domain.curation.CurationPaid;
 import server.api.termterm.domain.report.Report;
+import server.api.termterm.domain.term.DailyTerm;
 import server.api.termterm.dto.member.MemberInfoUpdateRequestDto;
 
 import javax.persistence.*;
@@ -58,6 +59,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private List<CommentLike> commentLikes;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyTerm> dailyTerms;
 
     @OneToMany(mappedBy = "member")
     private List<Report> reports;
