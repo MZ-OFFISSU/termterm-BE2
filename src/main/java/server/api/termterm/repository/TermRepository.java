@@ -43,4 +43,15 @@ public interface TermRepository extends JpaRepository<Term, Long> {
                     "on tb.member_id = :memberId and tb.term_id = t.term_id " +
                     "where tc.category_id = :categoryId")
     List<TermSimpleDtoInterface> getTermsByCategory(@Param("memberId") Long memberId, @Param("categoryId") Long categoryId);
+
+    @Query(nativeQuery = true,
+            value = "select t.term_id as termId, t.name, t.description, tb.status as bookmarked " +
+                    "from term t " +
+                    "inner join term_category tc " +
+                    "on t.term_id = tc.term_id " +
+                    "left join term_bookmark tb " +
+                    "on tb.member_id = :memberId and tb.term_id = t.term_id " +
+                    "where tc.category_id IN :categoryIds " +
+                    "order by RAND() limit 4 ")
+    List<TermSimpleDtoInterface> getTermsByCategoriesOnly4(@Param("memberId") Long memberId, @Param("categoryIds") List<Long> categoryIds);
 }

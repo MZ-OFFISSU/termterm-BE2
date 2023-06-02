@@ -12,12 +12,15 @@ import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.comment.Comment;
 import server.api.termterm.domain.member.Member;
+import server.api.termterm.domain.term.DailyTerm;
 import server.api.termterm.domain.term.Term;
 import server.api.termterm.dto.comment.CommentDto;
+import server.api.termterm.dto.dailyTerm.DailyTermAndStatusDto;
 import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
 import server.api.termterm.dto.term.TermSimpleDto;
 import server.api.termterm.dto.term.TermSimpleDtoInterface;
+import server.api.termterm.repository.DailyTermRepository;
 import server.api.termterm.repository.TermBookmarkRepository;
 import server.api.termterm.repository.TermRepository;
 import server.api.termterm.response.base.BizException;
@@ -25,6 +28,8 @@ import server.api.termterm.response.term.TermResponseType;
 
 import java.io.*;
 import java.sql.Clob;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +39,7 @@ import java.util.stream.Collectors;
 public class TermService {
     private final TermRepository termRepository;
     private final TermBookmarkRepository termBookmarkRepository;
+    private final DailyTermRepository dailyTermRepository;
 
     @Transactional(readOnly = true)
     public Term findById(Long id){
@@ -54,10 +60,19 @@ public class TermService {
 
     @Transactional
     public void bookmarkTerm(Member member, Long id) {
+        TermBookmark termBookmark = termBookmarkRepository.findByMemberAndTerm(member, findById(id));
+
+        if(termBookmark != null){
+            termBookmark.bookmark();
+            return;
+        }
+
+        // 존재하지 않으면 새로 만들고 저장
         termBookmarkRepository.save(TermBookmark.builder()
                 .member(member)
                 .term(findById(id))
                 .build());
+
     }
 
     private List<String> getCategoryString(List<Category> categories){
@@ -153,4 +168,119 @@ public class TermService {
         }
     }
 
+
+    private List<Long> getCategoryIds(List<Category> categories){
+        List<Long> categoryIds = new ArrayList<>();
+        for(Category category : categories){
+            categoryIds.add(category.getId());
+        }
+
+        return categoryIds;
+    }
+
+    private List<TermSimpleDto> saveDailyTerms(List<Term> terms, Member member){
+        List<TermSimpleDto> ret = new ArrayList<>();
+
+        for(Term term : terms){
+            dailyTermRepository.save(DailyTerm.builder().member(member).term(term).build());
+            BookmarkStatus status = getBookmarkStatusByMemberAndTerm(member, term);
+
+            ret.add(TermSimpleDto.builder()
+                            .id(term.getId())
+                            .name(term.getName())
+                            .bookmarked(status)
+                            .build());
+        }
+
+        return ret;
+    }
+
+    @Transactional
+    public BookmarkStatus getBookmarkStatusByMemberAndTerm(Member member, Term term){
+        TermBookmark termBookmark = termBookmarkRepository.findByMemberAndTerm(member, term);
+        return (termBookmark == null) ? BookmarkStatus.NO : termBookmark.getStatus();
+    }
+
+
+    @Transactional
+    public List<TermSimpleDto> updateDailyTerms(List<DailyTermAndStatusDto> dailyTerms, List<Term> newTerms, Member member){
+        List<TermSimpleDto> ret = new ArrayList<>();
+        Iterator<Term> termsIterator = newTerms.iterator();
+
+        for(DailyTermAndStatusDto dailyTermAndStatus : dailyTerms){
+            DailyTerm dailyTerm = dailyTermAndStatus.getDailyTerm();
+
+            Term newTerm = termsIterator.next();
+            dailyTerm.updateTerm(newTerm);
+
+            BookmarkStatus status = getBookmarkStatusByMemberAndTerm(member, newTerm);
+
+            ret.add(TermSimpleDto.builder()
+                            .id(newTerm.getId())
+                            .name(newTerm.getName())
+                            .description(newTerm.getDescription())
+                            .bookmarked(status)
+                            .build());
+        }
+
+        return ret;
+    }
+
+    private List<Term> getNewDailyTerms4(Member member){
+        List<Long> categoryIds = getCategoryIds(member.getCategories());
+
+        List<Term> dailyTerms4 = new ArrayList<>();
+        for(TermSimpleDtoInterface t : termRepository.getTermsByCategoriesOnly4(member.getId(), categoryIds)){
+            dailyTerms4.add(termRepository.findById(t.getTermId())
+                    .orElseThrow(()-> new BizException(TermResponseType.ID_NO_RESULT)));
+        }
+
+        return dailyTerms4;
+
+    }
+
+    @Transactional
+    public List<TermSimpleDto> refreshDailyTerms(Member member) {
+        List<Term> newDailyTerms4 = getNewDailyTerms4(member);
+
+        List<DailyTermAndStatusDto> dailyTerms = dailyTermRepository.getByMemberWithStatus(member);
+
+        if(dailyTerms.isEmpty()){
+            return saveDailyTerms(newDailyTerms4, member);
+        }else{
+            return updateDailyTerms(dailyTerms, newDailyTerms4, member);
+        }
+
+    }
+
+
+    private Boolean isLatest(DailyTerm dailyTerm){
+        LocalDate lastRefreshedDate = dailyTerm.getLastRefreshedDate();
+        LocalDate today = LocalDate.now();
+
+        return ChronoUnit.DAYS.between(lastRefreshedDate, today) == 0;
+    }
+
+    @Transactional
+    public List<TermSimpleDto> getDailyTerms(Member member) {
+        List<TermSimpleDto> res = new ArrayList<>();
+        for(DailyTermAndStatusDto dailyTermAndStatus :  dailyTermRepository.getByMemberWithStatus(member)){
+            DailyTerm dailyTerm = dailyTermAndStatus.getDailyTerm();
+            Term term = dailyTerm.getTerm();
+
+            // 오늘 날짜가 아닐 경우 갱신 후 응답
+            if(!isLatest(dailyTerm)){
+                return refreshDailyTerms(member);
+            }
+
+            res.add(TermSimpleDto.builder()
+                    .id(term.getId())
+                    .name(term.getName())
+                    .description(term.getDescription())
+                    .bookmarked(dailyTermAndStatus.getStatus())
+                    .build());
+        }
+
+        return res;
+    }
 }
