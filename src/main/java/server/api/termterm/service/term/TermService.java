@@ -60,10 +60,19 @@ public class TermService {
 
     @Transactional
     public void bookmarkTerm(Member member, Long id) {
+        TermBookmark termBookmark = termBookmarkRepository.findByMemberAndTerm(member, findById(id));
+
+        if(termBookmark != null){
+            termBookmark.bookmark();
+            return;
+        }
+
+        // 존재하지 않으면 새로 만들고 저장
         termBookmarkRepository.save(TermBookmark.builder()
                 .member(member)
                 .term(findById(id))
                 .build());
+
     }
 
     private List<String> getCategoryString(List<Category> categories){
