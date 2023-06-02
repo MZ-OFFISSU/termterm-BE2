@@ -103,12 +103,12 @@ public class TermController {
             @io.swagger.annotations.ApiResponse(code = 2055, message = "오늘의 용어 응답 성공"),
     })
     @GetMapping("/term/daily")
-    public ApiResponse<Object> getDailyTerms(
+    public ApiResponse<List<TermSimpleDto>> getDailyTerms(
             @Parameter(name = "Authorization", description = "Bearer {access-token}", in = HEADER, required = true) @RequestHeader(name = "Authorization") String token
     ){
         Member member = memberService.getMemberByToken(token);
-        List<TermSimpleDto> dailyTermList = termService.getDailyTerms(member);
+        List<TermSimpleDto> dailyTerms = termService.getDailyTerms(member);
 
-        return ApiResponse.of(TermResponseType.DAILY_SUCCESS, dailyTermList);
+        return ApiResponse.of(TermResponseType.DAILY_SUCCESS, dailyTerms);
     }
 }

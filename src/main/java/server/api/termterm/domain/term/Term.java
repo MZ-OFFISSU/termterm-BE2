@@ -40,4 +40,7 @@ public class Term {
     @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TermBookmark> termBookmarks;
 
+    @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyTerm> dailyTerms;
+
 }
