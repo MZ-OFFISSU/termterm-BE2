@@ -11,6 +11,8 @@ import server.api.termterm.domain.bookmark.BookmarkStatus;
 import server.api.termterm.domain.bookmark.TermBookmark;
 import server.api.termterm.domain.category.Category;
 import server.api.termterm.domain.comment.Comment;
+import server.api.termterm.domain.comment.CommentLike;
+import server.api.termterm.domain.comment.CommentLikeStatus;
 import server.api.termterm.domain.member.Member;
 import server.api.termterm.domain.term.DailyTerm;
 import server.api.termterm.domain.term.Term;
@@ -20,6 +22,7 @@ import server.api.termterm.dto.term.TermDto;
 import server.api.termterm.dto.term.TermMinimumDto;
 import server.api.termterm.dto.term.TermSimpleDto;
 import server.api.termterm.dto.term.TermSimpleDtoInterface;
+import server.api.termterm.repository.CommentLikeRepository;
 import server.api.termterm.repository.DailyTermRepository;
 import server.api.termterm.repository.TermBookmarkRepository;
 import server.api.termterm.repository.TermRepository;
@@ -40,6 +43,7 @@ public class TermService {
     private final TermRepository termRepository;
     private final TermBookmarkRepository termBookmarkRepository;
     private final DailyTermRepository dailyTermRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Transactional(readOnly = true)
     public Term findById(Long id){
@@ -85,10 +89,17 @@ public class TermService {
         return result;
     }
 
-    private List<CommentDto> getCommentDtos(List<Comment> comments){
+    /**
+     * term 디테일 API에 담길 Comment 정보 구성하기
+     */
+    private List<CommentDto> getCommentDtos(List<Comment> comments, Member member){
         List<CommentDto> commentDtos = new ArrayList<>();
 
         for(Comment comment : comments){
+
+            CommentLike commentLike = commentLikeRepository.findByMemberAndComment(member, comment);
+            CommentLikeStatus liked = commentLike == null ? CommentLikeStatus.NO : commentLike.getStatus();
+
             commentDtos.add(CommentDto.builder()
                     .id(comment.getId())
                     .content(comment.getContent())
@@ -96,6 +107,8 @@ public class TermService {
                     .authorName(comment.getMember().getNickname())
                     .authorJob(comment.getMember().getJob())
                     .authorProfileImageUrl(comment.getMember().getProfileImg())
+                    .source(comment.getSource())
+                    .liked(liked)
                     .createdDate(comment.getCreatedDate().toString())
                     .build());
         }
@@ -110,7 +123,7 @@ public class TermService {
         Term term = termDto.getTerm();
 
         termDto.setCategories(getCategoryString(term.getCategories()));
-        termDto.setComments(getCommentDtos(term.getComments()));
+        termDto.setComments(getCommentDtos(term.getComments(), member));
 
         return termDto;
     }
