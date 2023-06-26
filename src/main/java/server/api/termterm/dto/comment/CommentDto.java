@@ -15,4 +15,5 @@ public class CommentDto {
     private String authorJob;
     private String authorProfileImageUrl;
     private String createdDate;
+    private String source;
 }

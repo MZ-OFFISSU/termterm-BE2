@@ -96,6 +96,7 @@ public class TermService {
                     .authorName(comment.getMember().getNickname())
                     .authorJob(comment.getMember().getJob())
                     .authorProfileImageUrl(comment.getMember().getProfileImg())
+                    .source(comment.getSource())
                     .createdDate(comment.getCreatedDate().toString())
                     .build());
         }
