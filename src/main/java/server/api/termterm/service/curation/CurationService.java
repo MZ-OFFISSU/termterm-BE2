@@ -143,8 +143,12 @@ public class CurationService {
         List<String> tagStrings = getTagStrings(curation.getTags());
 
         return CurationDetailDto.builder()
+                .title(curation.getTitle())
+                .cnt(curation.getCnt())
+                .description(curation.getDescription())
+                .bookmarked(curationBookmarkRepository.findByCurationAndMember(curation, member).getStatus())
                 .paid(memberPaid)
-                .curationSimpleInfos(curationSimpleInfoDtoInterfaces)
+                .moreRecommendedCurations(curationSimpleInfoDtoInterfaces)
                 .termSimples(termSimpleDtos)
                 .tags(tagStrings)
                 .build();
